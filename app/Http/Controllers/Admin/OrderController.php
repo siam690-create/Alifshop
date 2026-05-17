@@ -1818,12 +1818,16 @@ class OrderController extends Controller
 
         $shippingArea = trim((string) optional($order->shipping)->area);
         $shippingAddress = trim((string) optional($order->shipping)->address);
+        $customerArea = trim((string) optional($order->customer)->area);
+        $customerAddress = trim((string) optional($order->customer)->address);
         $customerDistrict = trim((string) optional($order->customer)->district);
 
         $keywords = $this->buildPathaoKeywords([
             $shippingArea,
             $customerDistrict,
+            $customerArea,
             $shippingAddress,
+            $customerAddress,
         ]);
 
         if (empty($keywords)) {
@@ -1997,9 +2001,16 @@ class OrderController extends Controller
 
     private function normalizePathaoText($value): string
     {
-        $value = strtolower((string) $value);
-        $value = preg_replace('/[^a-z0-9]+/i', ' ', $value);
-        return trim(preg_replace('/\s+/', ' ', $value));
+        $value = (string) $value;
+        $value = strtr($value, [
+            '০' => '0', '১' => '1', '২' => '2', '৩' => '3', '৪' => '4',
+            '৫' => '5', '৬' => '6', '৭' => '7', '৮' => '8', '৯' => '9',
+        ]);
+        $value = function_exists('mb_strtolower')
+            ? mb_strtolower($value, 'UTF-8')
+            : strtolower($value);
+        $value = preg_replace('/[^\p{L}\p{N}]+/u', ' ', $value);
+        return trim((string) preg_replace('/\s+/u', ' ', $value));
     }
 
     private function buildPathaoKeywords(array $keywords): array
@@ -2028,10 +2039,12 @@ class OrderController extends Controller
             }
 
             $builtKeywords[] = $normalized;
+            $builtKeywords = array_merge($builtKeywords, $this->expandPathaoKeywordAliases($normalized));
 
             foreach (explode(' ', $normalized) as $part) {
                 if (strlen($part) >= 2 && !is_numeric($part)) {
                     $builtKeywords[] = $part;
+                    $builtKeywords = array_merge($builtKeywords, $this->expandPathaoKeywordAliases($part));
                 }
                 if (is_numeric($part)) {
                     $builtKeywords[] = $part;
@@ -2045,6 +2058,50 @@ class OrderController extends Controller
         }
 
         return array_values(array_unique(array_filter($builtKeywords)));
+    }
+
+    private function expandPathaoKeywordAliases(string $keyword): array
+    {
+        $aliases = [
+            'dhaka' => ['ঢাকা', 'dhaka city', 'inside dhaka', 'within dhaka'],
+            'chittagong' => ['চট্টগ্রাম', 'চট্রগ্রাম', 'ctg', 'chattogram'],
+            'cumilla' => ['কুমিল্লা', 'comilla'],
+            'barisal' => ['বরিশাল', 'barishal'],
+            'khulna' => ['খুলনা'],
+            'gazipur' => ['গাজীপুর', 'tongi', 'টঙ্গী'],
+            'narayanganj' => ['নারায়ণগঞ্জ', 'নারায়ণগঞ্জ'],
+            'mymensingh' => ['ময়মনসিংহ', 'ময়মনসিংহ'],
+            'rajshahi' => ['রাজশাহী'],
+            'rangpur' => ['রংপুর'],
+            'sylhet' => ['সিলেট'],
+            'bogura' => ['বগুড়া', 'বগুড়া', 'bogra'],
+            'mirpur' => ['মিরপুর'],
+            'uttara' => ['উত্তরা'],
+            'mohammadpur' => ['মোহাম্মদপুর'],
+            'dhanmondi' => ['ধানমন্ডি'],
+            'gulshan' => ['গুলশান'],
+            'banani' => ['বনানী'],
+            'badda' => ['বাড্ডা'],
+            'pallabi' => ['পল্লবী'],
+            'savar' => ['সাভার'],
+            'jatrabari' => ['যাত্রাবাড়ী', 'যাত্রাবাড়ী'],
+            'demra' => ['ডেমরা'],
+        ];
+
+        $expanded = [];
+        foreach ($aliases as $canonical => $variants) {
+            $normalizedCanonical = $this->normalizePathaoText($canonical);
+            $normalizedVariants = array_map(function ($variant) {
+                return $this->normalizePathaoText($variant);
+            }, $variants);
+
+            if ($keyword === $normalizedCanonical || in_array($keyword, $normalizedVariants, true)) {
+                $expanded[] = $normalizedCanonical;
+                $expanded = array_merge($expanded, $normalizedVariants);
+            }
+        }
+
+        return array_values(array_unique(array_filter($expanded)));
     }
 
     private function scorePathaoMatch(string $value, array $keywords): int
