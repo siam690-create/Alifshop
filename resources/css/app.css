@@ -1,0 +1,42 @@
+/* শুধুমাত্র মোবাইলের জন্য বাটন এক লাইনে আনা */
+@media screen and (max-width: 600px) {
+    .pro_btn {
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: nowrap !important;
+        align-items: center !important;
+        gap: 5px !important; /* বাটন দুটির মাঝের ফাঁকা জায়গা */
+        width: 100% !important;
+    }
+
+    .pro_btn form {
+        margin: 0 !important;
+        display: inline-block !important;
+    }
+
+    /* অর্ডার করুন বাটনটি বড় হবে */
+    .pro_btn form:first-child {
+        flex-grow: 1 !important;
+    }
+
+    .order-btn {
+        width: 100% !important;
+        white-space: nowrap !important;
+        padding: 8px 5px !important;
+        font-size: 13px !important;
+        height: 40px !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+
+    /* কার্ট আইকন বাটন */
+    .cart-icon-btn {
+        width: 45px !important;
+        height: 40px !important;
+        padding: 0 !important;
+        display: flex !important;
+        justify-content: center !important;
+        align-items: center !important;
+    }
+}
