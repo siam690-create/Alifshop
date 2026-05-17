@@ -97,7 +97,7 @@ class CreatePermissionTables extends Migration
             }
         });
 
-        Schema::create($tableNames['role_has_permissions'], function (Blueprint $table) use ($tableNames) {
+        Schema::create($tableNames['role_has_permissions'], function (Blueprint $table) use ($tableNames, $columnNames) {
             $table->unsignedBigInteger($columnNames['permission_pivot_key']);
             $table->unsignedBigInteger($columnNames['role_pivot_key']);
 

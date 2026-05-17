@@ -15,7 +15,7 @@ return new class extends Migration
     {
         Schema::create('reseller_withdrawals', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id'); // reseller user_id
+            $table->unsignedInteger('user_id'); // reseller user_id
             $table->decimal('amount', 14, 2);
             $table->decimal('charge', 14, 2)->default(0);
             $table->string('payout_method')->default('manual'); // manual|bkash|nagad|bank
