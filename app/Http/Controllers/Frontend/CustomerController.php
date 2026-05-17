@@ -774,6 +774,12 @@ class CustomerController extends Controller
     {
         $shippingcharge = ShippingCharge::where('status',1)->get();
         $select_charge = ShippingCharge::where('status',1)->first();
+        $districts = District::query()
+            ->whereNotNull('district')
+            ->select('district')
+            ->distinct()
+            ->orderBy('district')
+            ->get();
         $bkash_gateway = PaymentGateway::where(['status'=> 1, 'type'=>'bkash'])->first();
         $shurjopay_gateway = PaymentGateway::where(['status'=> 1, 'type'=>'shurjopay'])->first();
         $uddoktapay_gateway = PaymentGateway::where(['status'=> 1, 'type'=>'uddoktapay'])->first();
@@ -804,6 +810,7 @@ class CustomerController extends Controller
 
         return view('frontEnd.layouts.customer.checkout',compact(
             'shippingcharge',
+            'districts',
             'bkash_gateway',
             'shurjopay_gateway',
             'uddoktapay_gateway',
@@ -822,6 +829,7 @@ public function order_save(Request $request)
             'phone'=>'required',
             'address'=>'required',
             'area'=>'required',
+            'district'=>'required|string|max:100',
         ]);
 
         if(Cart::instance('shopping')->count() <= 0) {
@@ -869,17 +877,30 @@ public function order_save(Request $request)
 
         // Customer ঠিক করা
         if(Auth::guard('customer')->user()){
-            $customer_id = Auth::guard('customer')->user()->id;
+            $store = Auth::guard('customer')->user();
+            $store->name = $request->name;
+            $store->phone = $request->phone;
+            $store->address = $request->address;
+            $store->district = $request->district;
+            $store->save();
+            $customer_id = $store->id;
         }else{
             $exist = Customer::where('phone',$request->phone)->select('id')->first();
             if($exist){
-                $customer_id = $exist->id;
+                $store = Customer::find($exist->id);
+                $store->name = $request->name;
+                $store->address = $request->address;
+                $store->district = $request->district;
+                $store->save();
+                $customer_id = $store->id;
             }else{
                 $password = rand(111111,999999);
                 $store = new Customer();
                 $store->name = $request->name;
                 $store->slug = Str::slug($request->name);
                 $store->phone = $request->phone;
+                $store->address = $request->address;
+                $store->district = $request->district;
                 $store->password = bcrypt($password);
                 $store->verify = 1;
                 $store->status = 'active';

@@ -458,6 +458,20 @@
                                 </div>
                                 <div class="col-12">
                                     <div class="form-group">
+                                        <label class="form-label-custom">জেলা *</label>
+                                        <select id="district" class="form-control-custom select2" name="district" required>
+                                            <option value="">জেলা নির্বাচন করুন...</option>
+                                            @foreach ($districts as $district)
+                                                <option value="{{ $district->district }}"
+                                                    {{ (Auth::guard('customer')->user()->district ?? old('district')) == $district->district ? 'selected' : '' }}>
+                                                    {{ $district->district }}
+                                                </option>
+                                            @endforeach
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-12">
+                                    <div class="form-group">
                                         <label class="form-label-custom">সম্পূর্ণ ঠিকানা *</label>
                                         <input type="text" name="address" class="form-control-custom" 
                                             value="{{ Auth::guard('customer')->user()->address ?? old('address') }}" placeholder="বাসা নং, রোড নং, এলাকা, জেলা" required>
