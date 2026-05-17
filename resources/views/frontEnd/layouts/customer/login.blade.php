@@ -1,7 +1,7 @@
 @extends('frontEnd.layouts.master')
 @section('title','Customer Login')
 @php
-    $generalsetting = \App\Models\GeneralSetting::first();
+    $generalsetting = \App\Models\GeneralSetting::activeOrDefault();
 @endphp
 @section('content')
 {{-- CSS সরাসরি এখানে দেওয়া হলো যাতে কোনো এরর না হয় --}}

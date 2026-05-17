@@ -1,7 +1,7 @@
 @extends('frontEnd.layouts.master')
 @section('title','Contact Us')
 @php
-    $generalsetting = \App\Models\GeneralSetting::first();
+    $generalsetting = \App\Models\GeneralSetting::activeOrDefault();
 @endphp
 @section('content')
 

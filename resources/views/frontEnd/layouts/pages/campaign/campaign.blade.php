@@ -25,7 +25,7 @@
 
     // ডিফল্ট শিপিং (UI এর জন্য, JS পরে আপডেট করবে)
     $defaultShipping = optional($shippingcharge->first())->amount ?? 0;
-    $generalsetting = \App\Models\GeneralSetting::first();
+    $generalsetting = \App\Models\GeneralSetting::activeOrDefault();
     $heroListsLeft = array_values(array_filter([
         $campaign_data->hero_list_1,
         $campaign_data->hero_list_2,

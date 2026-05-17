@@ -10,7 +10,7 @@
     if(isset($generalsetting) && $generalsetting && !empty($generalsetting->dark_logo)) {
         $logo = $generalsetting->dark_logo;
     } else {
-        $gs = \App\Models\GeneralSetting::where('status', 1)->first();
+        $gs = \App\Models\GeneralSetting::activeOrDefault();
         if($gs && !empty($gs->dark_logo)) {
             $logo = $gs->dark_logo;
         }

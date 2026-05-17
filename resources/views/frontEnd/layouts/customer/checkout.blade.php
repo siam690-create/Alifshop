@@ -1,7 +1,7 @@
 @extends('frontEnd.layouts.master')
 @section('title', 'Customer Checkout')
 @php
-    $generalsetting = \App\Models\GeneralSetting::first();
+    $generalsetting = \App\Models\GeneralSetting::activeOrDefault();
 @endphp
 @push('css')
 <link rel="stylesheet" href="{{ asset('public/frontEnd/css/select2.min.css') }}" />

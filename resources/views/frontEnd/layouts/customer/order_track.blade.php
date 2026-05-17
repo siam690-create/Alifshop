@@ -1,7 +1,7 @@
 @extends('frontEnd.layouts.master')
 @section('title','Track Your Order')
 @php
-    $generalsetting = \App\Models\GeneralSetting::first();
+    $generalsetting = \App\Models\GeneralSetting::activeOrDefault();
 @endphp
 @push('css')
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">

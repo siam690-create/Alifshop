@@ -63,7 +63,7 @@ class FrontendController extends Controller
     protected function getHomepageData()
     {
         // General setting
-        $generalsetting = GeneralSetting::where('status', 1)->limit(1)->first();
+        $generalsetting = GeneralSetting::activeOrDefault();
 
         // SEO setting
         $seo = DB::table('seo_settings')->first();
@@ -506,7 +506,7 @@ $brands = Brand::where('status', 1)
         $vendor->total_products = $vendorProducts->count();
 
         // General setting
-        $generalsetting = GeneralSetting::where('status', 1)->limit(1)->first();
+        $generalsetting = GeneralSetting::activeOrDefault();
         $seo = DB::table('seo_settings')->first();
 
         return view('frontEnd.layouts.pages.vendor-shop', compact(
@@ -628,7 +628,7 @@ $brands = Brand::where('status', 1)
         }
 
         // General setting
-        $generalsetting = GeneralSetting::where('status', 1)->limit(1)->first();
+        $generalsetting = GeneralSetting::activeOrDefault();
         $seo = DB::table('seo_settings')->first();
 
         return view('frontEnd.layouts.pages.sellers', compact(

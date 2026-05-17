@@ -6,7 +6,7 @@ $customer = Auth::guard('customer')->user();
 $customerId = $customer->id;
 
 // Site Name & Logo
-$siteName = \App\Models\GeneralSetting::first();
+$siteName = \App\Models\GeneralSetting::activeOrDefault();
 $siteInitial = strtoupper(substr($siteName->name ?? 'G', 0, 1));
 $siteDisplayName = Str::limit($siteName->name ?? 'GadgetShop', 8);
 $generalsetting = $siteName;

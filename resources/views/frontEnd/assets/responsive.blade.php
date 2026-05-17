@@ -1,5 +1,5 @@
 @php
-    $generalsetting = \App\Models\GeneralSetting::first();
+    $generalsetting = \App\Models\GeneralSetting::activeOrDefault();
 @endphp
 @media only screen and (min-width:767px) {
     .mobile-menu {

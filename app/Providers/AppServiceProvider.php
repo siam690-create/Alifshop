@@ -163,7 +163,7 @@ class AppServiceProvider extends ServiceProvider
             
             // Cache general setting (30 minutes)
             $generalsetting = Cache::remember('general_setting', 1800, function () {
-                return GeneralSetting::where('status', 1)->first();
+                return GeneralSetting::activeOrDefault();
             });
             view()->share('generalsetting', $generalsetting);
             view()->share('demoMode', filter_var(env('DEMO_MODE', false), FILTER_VALIDATE_BOOLEAN));

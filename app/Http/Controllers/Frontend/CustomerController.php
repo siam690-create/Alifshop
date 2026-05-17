@@ -467,7 +467,7 @@ class CustomerController extends Controller
         $customer_info = Customer::where('phone',session::get('verify_phone'))->first();
         $customer_info->verify = rand(1111,9999);
         $customer_info->save();
-        $site_setting = GeneralSetting::where('status', 1)->first();
+        $site_setting = GeneralSetting::activeOrDefault();
         $sms_gateway = SmsGateway::where('status', 1)->first();
 
         if($sms_gateway) {
@@ -564,7 +564,7 @@ class CustomerController extends Controller
             return back();
         }
 
-        $site_setting = GeneralSetting::where('status', 1)->first();
+        $site_setting = GeneralSetting::activeOrDefault();
         $sms_gateway = SmsGateway::where(['status'=> 1, 'forget_pass'=>1])->first();
         
         $otp = $customer_info ? $customer_info->forgot : ($vendor_info ? $vendor_info->forgot : Session::get('reseller_forgot_otp'));
@@ -643,7 +643,7 @@ class CustomerController extends Controller
             return redirect()->route('customer.forgot.password');
         }
 
-        $site_setting = GeneralSetting::where('status', 1)->first();
+        $site_setting = GeneralSetting::activeOrDefault();
         $sms_gateway = SmsGateway::where(['status'=> 1])->first();
 
         if($sms_gateway) {
@@ -967,7 +967,7 @@ public function order_save(Request $request)
 
                 $customerPhone = isset($shipping) && $shipping->phone ? $shipping->phone : ($request->phone ?? ($order->customer->phone ?? null));
                 $customerName  = isset($shipping) && $shipping->name ? $shipping->name : ($request->name ?? ($order->customer->name ?? 'Customer'));
-                $site_setting = GeneralSetting::where('status', 1)->first();
+                $site_setting = GeneralSetting::activeOrDefault();
 
                 if($customerPhone) {
                     $customerMessage = "প্রিয় {$customerName}! আপনার অর্ডার #{$order->invoice_id} সফলভাবে গ্রহণ করা হয়েছে। মোট: {$order->amount} Tk. {$site_setting->name}";
@@ -1014,7 +1014,7 @@ public function order_save(Request $request)
                     $adminPhones = $contact->phone ?? null;
                 }
 
-                $site_setting = GeneralSetting::where('status', 1)->first();
+                $site_setting = GeneralSetting::activeOrDefault();
                 $customerName = isset($request->name) ? $request->name : ($order->customer->name ?? 'Customer');
                 $customerPhone = isset($request->phone) ? $request->phone : ($order->customer->phone ?? '');
                 $adminMessage = "নতুন অর্ডার এসেছে!\nOrder#: {$order->invoice_id}\nকাস্টমার: {$customerName}\nমোবাইল: {$customerPhone}\nমোট: {$order->amount} Tk {$site_setting->name}";
