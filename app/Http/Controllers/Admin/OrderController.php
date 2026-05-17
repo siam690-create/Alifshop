@@ -1720,35 +1720,29 @@ class OrderController extends Controller
             }
 
             try {
-                $location = $this->resolvePathaoOrderLocation($pathao_info, $order, $request);
-
-                if (!$location['city_id'] || !$location['zone_id'] || !$location['area_id']) {
-                    $results['failed'][] = [
-                        'order_id' => $order_id,
-                        'message' => $location['message'] ?: 'Pathao area could not be detected automatically.',
-                    ];
-                    continue;
-                }
+                $manualPathaoLocation = $this->resolvePathaoOrderLocation($pathao_info, $order, $request);
 
                 // Clean up URL - remove trailing slashes and /aladdin if present
                 $baseUrl = rtrim($pathao_info->url, '/');
                 $baseUrl = preg_replace('#/aladdin/?$#', '', $baseUrl);
-                
-                $response = Http::withHeaders([
-                    'Authorization' => 'Bearer ' . $pathao_info->token,
-                    'Accept'        => 'application/json',
-                    'Content-Type'  => 'application/json',
-                ])->post($baseUrl . '/aladdin/api/v1/orders', [
+
+                $recipientAddress = $this->buildPathaoRecipientAddress($order);
+                if ($recipientAddress === '') {
+                    $results['failed'][] = [
+                        'order_id' => $order_id,
+                        'message' => 'Customer address is missing for Pathao.',
+                    ];
+                    continue;
+                }
+
+                $payload = [
                     'store_id'           => $storeId,
                     'merchant_order_id'  => $order->invoice_id,
                     'sender_name'        => 'Test',
                     'sender_phone'       => $order->shipping ? $order->shipping->phone : '',
                     'recipient_name'     => $order->shipping ? $order->shipping->name : '',
                     'recipient_phone'    => $order->shipping ? $order->shipping->phone : '',
-                    'recipient_address'  => $order->shipping ? $order->shipping->address : '',
-                    'recipient_city'     => $location['city_id'],
-                    'recipient_zone'     => $location['zone_id'],
-                    'recipient_area'     => $location['area_id'],
+                    'recipient_address'  => $recipientAddress,
                     'delivery_type'      => 48,
                     'item_type'          => 2,
                     'special_instruction'=> 'Special note- product must be check after delivery',
@@ -1756,7 +1750,19 @@ class OrderController extends Controller
                     'item_weight'        => 0.5,
                     'amount_to_collect'  => round($order->amount),
                     'item_description'   => 'Special note- product must be check after delivery',
-                ]);
+                ];
+
+                if ($manualPathaoLocation['city_id'] && $manualPathaoLocation['zone_id'] && $manualPathaoLocation['area_id']) {
+                    $payload['recipient_city'] = $manualPathaoLocation['city_id'];
+                    $payload['recipient_zone'] = $manualPathaoLocation['zone_id'];
+                    $payload['recipient_area'] = $manualPathaoLocation['area_id'];
+                }
+
+                $response = Http::withHeaders([
+                    'Authorization' => 'Bearer ' . $pathao_info->token,
+                    'Accept'        => 'application/json',
+                    'Content-Type'  => 'application/json',
+                ])->post($baseUrl . '/aladdin/api/v1/orders', $payload);
 
                 if ($response->successful()) {
                     $res = $response->json();
@@ -1905,6 +1911,21 @@ class OrderController extends Controller
             'area_id' => $areaId,
             'message' => null,
         ];
+    }
+
+    private function buildPathaoRecipientAddress(Order $order): string
+    {
+        $parts = [
+            trim((string) optional($order->shipping)->address),
+            trim((string) optional($order->customer)->area),
+            trim((string) optional($order->customer)->district),
+        ];
+
+        $parts = array_values(array_unique(array_filter($parts, function ($part) {
+            return $part !== '';
+        })));
+
+        return implode(', ', $parts);
     }
 
     private function fetchPathaoCities($pathaoInfo): array
