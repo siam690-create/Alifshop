@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::table('campaigns', function (Blueprint $table) {
             if (!Schema::hasColumn('campaigns', 'auto_select_product_ids')) {
-                $table->longText('auto_select_product_ids')->nullable()->after('product_id');
+                $table->longText('auto_select_product_ids')->nullable()->after('status');
             }
         });
     }
