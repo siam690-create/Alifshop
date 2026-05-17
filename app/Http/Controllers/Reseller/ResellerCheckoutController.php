@@ -19,7 +19,7 @@ use App\Models\DigitalDownload;
 use Gloudemans\Shoppingcart\Facades\Cart;
 use Brian2694\Toastr\Facades\Toastr;
 use Illuminate\Support\Str;
-use shurjopayv2\ShurjopayLaravelPackage8\Http\Controllers\ShurjopayController;
+use shurjopay\ShurjopayLaravelPackage\Http\Controllers\ShurjopayController;
 use App\Http\Controllers\Frontend\ShoppingController;
 
 class ResellerCheckoutController extends Controller

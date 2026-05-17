@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "8b0bcd6829cb5f0bc8b39a439c4bde89",
+    "content-hash": "f55e2cc87ad17b3f99154d396138e914",
     "packages": [
         {
             "name": "brian2694/laravel-toastr",
@@ -3863,24 +3863,24 @@
             "time": "2025-12-14T04:43:48+00:00"
         },
         {
-            "name": "shurjopayv2/laravel8",
+            "name": "shurjopay/laravel",
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/NAM00/spV2_Laravel8.git",
-                "reference": "9c9fce571a99f29f011d0aa0670e5ad1555baea2"
+                "url": "https://github.com/smukhishahadat/sp2laravel.git",
+                "reference": "e67ab2fdc016fd3409329acc9289b8b313e4e80e"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/NAM00/spV2_Laravel8/zipball/9c9fce571a99f29f011d0aa0670e5ad1555baea2",
-                "reference": "9c9fce571a99f29f011d0aa0670e5ad1555baea2",
+                "url": "https://api.github.com/repos/smukhishahadat/sp2laravel/zipball/e67ab2fdc016fd3409329acc9289b8b313e4e80e",
+                "reference": "e67ab2fdc016fd3409329acc9289b8b313e4e80e",
                 "shasum": ""
             },
             "default-branch": true,
             "type": "library",
             "autoload": {
                 "psr-4": {
-                    "shurjopayv2\\ShurjopayLaravelPackage8\\": "src/"
+                    "shurjopay\\ShurjopayLaravelPackage\\": "src/"
                 }
             },
             "notification-url": "https://packagist.org/downloads/",
@@ -3889,16 +3889,16 @@
             ],
             "authors": [
                 {
-                    "name": "Nazia Afsan Mowmita",
-                    "email": "mowmita@shurjomukhi.com.bd"
+                    "name": "Nazmus Shahadat",
+                    "email": "nazmus.shahadat@shurjomukhi.com.bd"
                 }
             ],
             "description": "Online Payment Gateway",
             "support": {
-                "issues": "https://github.com/NAM00/spV2_Laravel8/issues",
-                "source": "https://github.com/NAM00/spV2_Laravel8/tree/master"
+                "issues": "https://github.com/smukhishahadat/sp2laravel/issues",
+                "source": "https://github.com/smukhishahadat/sp2laravel/tree/master"
             },
-            "time": "2021-11-01T06:12:18+00:00"
+            "time": "2021-08-11T20:43:40+00:00"
         },
         {
             "name": "spatie/browsershot",
@@ -9874,7 +9874,7 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "shurjopayv2/laravel8": 20
+        "shurjopay/laravel": 20
     },
     "prefer-stable": true,
     "prefer-lowest": false,

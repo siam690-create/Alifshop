@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Frontend;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Log;
-use shurjopayv2\ShurjopayLaravelPackage8\Http\Controllers\ShurjopayController;
+use shurjopay\ShurjopayLaravelPackage\Http\Controllers\ShurjopayController;
 use Illuminate\Http\Request;
 use App\Models\Customer;
 use App\Models\Order;
