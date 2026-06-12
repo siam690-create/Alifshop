@@ -404,6 +404,7 @@
 }
 </style>
         @foreach($pixels as $pixel)
+        @continue(isset($pixel->browser_tracking_enabled) && !$pixel->browser_tracking_enabled)
         <!-- Facebook Pixel Code -->
         <script>
             !(function (f, b, e, v, n, t, s) {

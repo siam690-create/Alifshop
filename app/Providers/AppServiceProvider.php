@@ -4,7 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use App\Models\{GeneralSetting, Category, Brand, SocialMedia, Contact, CreatePage, OrderStatus, EcomPixel, GoogleTagManager, Order, PaymentGateway, User, Review, Vendor, ResellerWithdrawal};
-use Illuminate\Support\Facades\{Config, Session, Gate, Http, Cache, Auth, Hash};
+use Illuminate\Support\Facades\{Config, Session, Gate, Http, Cache, Auth, Hash, Schema};
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -233,7 +233,16 @@ class AppServiceProvider extends ServiceProvider
             
             // Cache pixels (30 minutes)
             $pixels = Cache::remember('pixels_list', 1800, function () {
-                return EcomPixel::where('status', 1)->get();
+                $query = EcomPixel::where('status', 1);
+
+                if (Schema::hasColumn('ecom_pixels', 'browser_tracking_enabled')) {
+                    $query->where(function ($builder) {
+                        $builder->where('browser_tracking_enabled', 1)
+                            ->orWhereNull('browser_tracking_enabled');
+                    });
+                }
+
+                return $query->get();
             });
             view()->share('pixels', $pixels);
             

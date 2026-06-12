@@ -98,6 +98,8 @@
                             <tr>
                                 <th style="width: 50px;">SL</th>
                                 <th>Pixel ID / Code</th>
+                                <th>Browser</th>
+                                <th>Server CAPI</th>
                                 <th>Status</th>
                                 <th class="text-end" style="width: 150px;">Action</th>
                             </tr>
@@ -109,6 +111,22 @@
                                 
                                 <td>
                                     <span class="pixel-code">{{$value->code}}</span>
+                                </td>
+
+                                <td>
+                                    @if(($value->browser_tracking_enabled ?? 1) == 1)
+                                        <span class="badge badge-pill badge-soft-success">On</span>
+                                    @else
+                                        <span class="badge badge-pill badge-soft-danger">Off</span>
+                                    @endif
+                                </td>
+
+                                <td>
+                                    @if(($value->server_tracking_enabled ?? 0) == 1)
+                                        <span class="badge badge-pill badge-soft-success">On</span>
+                                    @else
+                                        <span class="badge badge-pill badge-soft-danger">Off</span>
+                                    @endif
                                 </td>
 
                                 <td>

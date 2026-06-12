@@ -1001,33 +1001,6 @@
         });
     });
 </script>
-<script type="text/javascript">
-    window.dataLayer = window.dataLayer || [];
-    (function () {
-        const items = @json($cartItemsForJs);
-        const payable = "{{ $payable_now }}";
-        const coupon = @json(Session::get('coupon_code', null));
-
-        const gaItems = items.map((item, i) => ({ item_id: String(item.id), item_name: item.name, quantity: Number(item.qty), price: Number(item.price), index: i }));
-
-        if (gaItems.length) {
-            window.dataLayer.push({ event: "begin_checkout", ecommerce: { currency: "BDT", value: payable, coupon: coupon, items: gaItems } });
-        }
-        if (typeof fbq === "function") {
-            fbq("track", "InitiateCheckout", { value: payable, currency: "BDT", num_items: items.length });
-        }
-
-        document.addEventListener("DOMContentLoaded", function () {
-            var form = document.getElementById("checkout-form");
-            if (!form) return;
-            form.addEventListener("submit", function () {
-                var paymentMethod = form.querySelector('input[name="payment_method"]:checked')?.value;
-                window.dataLayer.push({ event: "add_payment_info", payment_type: paymentMethod, ecommerce: { currency: "BDT", value: payable, coupon: coupon, items: gaItems } });
-                if (typeof fbq === "function") fbq("track", "AddPaymentInfo", { value: payable, currency: "BDT", payment_method: paymentMethod });
-            });
-        });
-    })();
-</script>
 {{-- 🔹 GA4 + Facebook Pixel Tracking for Checkout --}}
 <script type="text/javascript">
     window.dataLayer = window.dataLayer || [];

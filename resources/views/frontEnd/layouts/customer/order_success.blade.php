@@ -273,8 +273,34 @@
 @endsection
 
 @push('script')
+@php
+    $purchaseItems = $order->orderdetails->map(function ($item, $index) {
+        return [
+            'item_id' => (string) ($item->product_id ?? $item->id),
+            'item_name' => $item->product_name,
+            'index' => $index,
+            'price' => (float) $item->sale_price,
+            'quantity' => (int) $item->qty,
+        ];
+    })->values();
+@endphp
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
+window.dataLayer = window.dataLayer || [];
+window.dataLayer.push({ ecommerce: null });
+window.dataLayer.push({
+    event: "purchase",
+    ecommerce: {
+        transaction_id: @json((string) ($order->invoice_id ?? $order->id)),
+        currency: "BDT",
+        value: {{ (float) $grand_total }},
+        tax: 0,
+        shipping: {{ (float) ($order->shipping_charge ?? 0) }},
+        coupon: @json($order->coupon_code ?? ''),
+        items: @json($purchaseItems)
+    }
+});
+
 function downloadPDF() {
     const element = document.getElementById('invoice-pdf-area');
     const invoice_id = "{{ $order->invoice_id }}";
