@@ -259,14 +259,18 @@
             $customerPhone = $shipping->phone ?? optional($order->customer)->phone ?? 'N/A';
             $customerAddress = trim((string) ($shipping->address ?? '')) ?: 'N/A';
 
+            $siteShopName = trim((string) ($generalsetting->name ?? config('app.name', 'Alifshop')));
             $reseller = $order->user;
-            $resellerShopName = trim((string) ($reseller->shop_name ?? optional(optional($reseller)->vendor)->shop_name ?? 'SellwayBD'));
+            $isResellerOrder = !is_null($order->reseller_profit) && (float) $order->reseller_profit > 0 && !empty($reseller);
+            $resellerShopName = trim((string) ($reseller->shop_name ?? optional(optional($reseller)->vendor)->shop_name ?? ''));
+            $printShopName = $isResellerOrder && $resellerShopName !== ''
+                ? $resellerShopName
+                : ($siteShopName !== '' ? $siteShopName : 'Alifshop');
             $resellerProfilePhone = null;
             if (!empty($reseller?->email)) {
                 $resellerProfilePhone = optional(\App\Models\Customer::where('email', $reseller->email)->select('phone')->first())->phone;
             }
             $resellerPhone = trim((string) ($resellerProfilePhone ?? optional(optional($reseller)->vendor)->phone ?? ''));
-            $isResellerOrder = !is_null($order->reseller_profit) && (float) $order->reseller_profit > 0 && !empty($reseller);
             $shopPhoneDisplay = $isResellerOrder && $resellerPhone !== ''
                 ? $resellerPhone
                 : ($defaultSitePhone !== '' ? $defaultSitePhone : 'N/A');
@@ -313,18 +317,18 @@
         <div class="receipt">
             <div class="receipt-header">
                 @if(isset($generalsetting) && !empty($generalsetting->dark_logo))
-                    <img src="{{ asset($generalsetting->dark_logo) }}" alt="SellwayBD" class="receipt-logo">
+                    <img src="{{ asset($generalsetting->dark_logo) }}" alt="{{ $siteShopName ?: 'Alifshop' }}" class="receipt-logo">
                 @elseif(isset($generalsetting) && !empty($generalsetting->white_logo))
-                    <img src="{{ asset($generalsetting->white_logo) }}" alt="SellwayBD" class="receipt-logo">
+                    <img src="{{ asset($generalsetting->white_logo) }}" alt="{{ $siteShopName ?: 'Alifshop' }}" class="receipt-logo">
                 @else
-                    <div style="font-weight:700; font-size:16px;">SellwayBD</div>
+                    <div style="font-weight:700; font-size:16px;">{{ $siteShopName ?: 'Alifshop' }}</div>
                 @endif
             </div>
 
             <div class="top-meta">
                 <div class="meta-line">
                     <span class="meta-label">Shop Name :</span>
-                    <span class="meta-value">{{ $resellerShopName ?: 'N/A' }}</span>
+                    <span class="meta-value">{{ $printShopName }}</span>
                 </div>
                 <div class="meta-line">
                     <span class="meta-label">Phone No. :</span>
