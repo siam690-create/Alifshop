@@ -2,16 +2,102 @@
 @section('title','Order Create') 
 @section('css')
 <style>
+    body { background: #f3f6f9; }
+    .order-simple-shell {
+        background: #f3f6f9;
+        padding: 24px 14px 38px;
+    }
+    .order-back-link {
+        background: #15c7aa;
+        border-radius: 4px;
+        color: #fff;
+        display: inline-block;
+        font-weight: 700;
+        padding: 9px 13px;
+    }
+    .order-back-link:hover { color: #fff; opacity: .92; }
+    .order-simple-card {
+        background: #fff;
+        border: 0;
+        border-radius: 8px;
+        overflow: visible;
+    }
+    .order-simple-card .card-heading {
+        border-bottom: 1px solid #edf0f4;
+        color: #1d2636;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        margin: 0;
+        padding: 20px 24px;
+        text-align: center;
+    }
+    .order-simple-card .card-body { padding: 22px 24px 26px; }
+    .order-simple-card label {
+        color: #111827;
+        font-size: 14px;
+        margin-bottom: 9px;
+    }
+    .order-simple-card .form-control,
+    .order-simple-card .form-select,
+    .order-simple-card .select2-container .select2-selection--single {
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        min-height: 46px;
+    }
+    .order-simple-card .select2-container .select2-selection--single .select2-selection__rendered {
+        line-height: 44px;
+    }
+    .order-simple-card .select2-container .select2-selection--single .select2-selection__arrow {
+        height: 44px;
+    }
+    .product-table-wrap { overflow-x: auto; }
+    .order-product-table { min-width: 960px; }
+    .order-product-table thead {
+        background: #f4f6fa;
+        color: #48556a;
+    }
+    .order-product-table th {
+        border: 0 !important;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 15px 10px;
+    }
+    .order-product-table td {
+        border-top: 1px solid #edf0f4;
+        vertical-align: middle;
+    }
+    .pos-summary-table {
+        margin-left: auto;
+        max-width: 430px;
+    }
+    .pos-summary-table td {
+        border-color: #edf0f4;
+        padding: 11px 10px;
+    }
+    .pos-grand-total {
+        color: #008a2e;
+        font-size: 18px !important;
+        font-weight: 800;
+    }
+    .btn-pos-primary {
+        background: #15c7aa;
+        border: none;
+        border-radius: 4px;
+        color: #fff;
+        font-weight: 700;
+        padding: 10px 18px;
+    }
+    .btn-pos-primary:hover { color: #fff; opacity: .94; }
     .increment_btn, .remove_btn {
         margin-top: -17px;
         margin-bottom: 10px;
     }
     .payment-box {
-        background: #f8f9fa;
-        border: 1px solid #dee2e6;
+        background: #fbfcfe;
+        border: 1px solid #edf0f4;
         border-radius: 8px;
-        padding: 20px;
-        margin-top: 10px;
+        padding: 18px;
     }
     .payment-box h6 {
         font-weight: 600;
@@ -64,7 +150,7 @@
 @endsection 
 
 @section('content')
-<div class="container-fluid">
+<div class="container-fluid order-simple-shell">
     @php
         $rawOrderSource = trim((string) ($order->note ?? ''));
         $orderSourceValue = '';
@@ -81,56 +167,119 @@
         if ($courierNoteValue === '' && $legacyCourierNote !== '') {
             $courierNoteValue = $legacyCourierNote;
         }
+
+        $subtotal = Cart::instance('pos_shopping')->subtotal();
+        $subtotal = str_replace([',','.00'], '', $subtotal);
+        $shipping = Session::get('pos_shipping');
+        $total_discount = Session::get('pos_discount') + Session::get('product_discount');
+        $total = ($subtotal + $shipping) - $total_discount;
+        $paidAmount = \App\Models\Payment::where('order_id', $order->id)->sum('amount');
+        $advancePaid = 0;
+        $dueAmount = $total;
+
+        if ($paidAmount > 0 && $paidAmount < $total) {
+            $advancePaid = $paidAmount;
+            $dueAmount = $total - $advancePaid;
+        }
     @endphp
-    <!-- Page Title -->
-    <div class="row">
-        <div class="col-12">
-            <div class="page-title-box">
-                <div class="page-title-right">
-                    <form method="get" action="{{route('admin.order.cart_clear')}}" class="d-inline">
-                        @csrf
-                        <button type="submit" class="btn btn-danger rounded-pill delete-confirm" title="Delete">
-                            <i class="fas fa-trash-alt"></i> Cart Clear
-                        </button>
-                    </form>
-                </div>
-                <h4 class="page-title">Order Create</h4>
-            </div>
-        </div>
+
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+        <a href="{{ route('admin.orders', 'all') }}" class="order-back-link">
+            <i class="fa fa-arrow-left"></i> Back
+        </a>
+        <form method="get" action="{{route('admin.order.cart_clear')}}" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm" title="Clear Cart">
+                <i class="fas fa-trash-alt"></i> Cart Clear
+            </button>
+        </form>
     </div>
 
-    <!-- Order Create Form -->
-    <div class="row justify-content-center">
-        <div class="col-lg-12">
-            <div class="card">
-                <div class="card-body">
-                    <form action="{{route('admin.order.update')}}" method="POST" class="row pos_form" enctype="multipart/form-data">
-                        @csrf
-                        <input type="hidden" value="{{$order->id}}" name="order_id">
+    <form action="{{route('admin.order.update')}}" method="POST" class="pos_form" enctype="multipart/form-data">
+        @csrf
+        <input type="hidden" value="{{$order->id}}" name="order_id">
 
-                        <!-- Product Select -->
-                        <div class="col-sm-12">
-                            <div class="form-group mb-3">
-                                <label class="form-label">Products *</label>
-                                <select id="cart_add" class="form-control select2">
-                                    <option value="">Select..</option>
-                                    @foreach($products as $value)
-                                        <option value="{{$value->id}}">{{$value->name}}</option> 
-                                    @endforeach
-                                </select>
-                            </div>
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="order-simple-card">
+                    <h5 class="card-heading">Customer Information</h5>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Customer Phone</label>
+                            <input type="number" id="phone" class="form-control" placeholder="Enter customer 11 digit mobile number" name="phone" value="{{$shippinginfo->phone}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" id="name" class="form-control" placeholder="Name" name="name" value="{{$shippinginfo->name}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <input type="text" id="address" class="form-control" placeholder="address" name="address" value="{{$shippinginfo->address}}" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Delivery Area</label>
+                            <select id="area" class="form-control" name="area" required>
+                                <option value="">Select Delivery Area</option>
+                                @foreach($shippingcharge as $key=>$value)
+                                    <option value="{{$value->id}}" @if($shippinginfo->area == $value->name) selected @endif>{{$value->name}}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Order Source</label>
+                            <select id="order_source" name="order_source" class="form-control">
+                                <option value="">Select Source</option>
+                                <option value="Web Site" {{ $orderSourceValue === 'Web Site' ? 'selected' : '' }}>Web Site</option>
+                                <option value="FB" {{ $orderSourceValue === 'FB' ? 'selected' : '' }}>FB</option>
+                                <option value="Whatsapp" {{ $orderSourceValue === 'Whatsapp' ? 'selected' : '' }}>Whatsapp</option>
+                                <option value="Landing Page" {{ $orderSourceValue === 'Landing Page' ? 'selected' : '' }}>Landing Page</option>
+                                <option value="Messenger" {{ $orderSourceValue === 'Messenger' ? 'selected' : '' }}>Messenger</option>
+                                <option value="Phone Call" {{ $orderSourceValue === 'Phone Call' ? 'selected' : '' }}>Phone Call</option>
+                                <option value="Reseller" {{ $orderSourceValue === 'Reseller' ? 'selected' : '' }}>Reseller</option>
+                                <option value="Imo" {{ $orderSourceValue === 'Imo' ? 'selected' : '' }}>Imo</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Order Status</label>
+                            <select id="order_status" name="order_status" class="form-control">
+                                @foreach($quickOrderStatuses ?? [] as $status)
+                                    <option value="{{ $status->id }}" {{ (int) $order->order_status === (int) $status->id ? 'selected' : '' }}>
+                                        {{ $status->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Note</label>
+                            <textarea id="courier_note" class="form-control" name="courier_note" rows="2" placeholder="note">{{ $courierNoteValue }}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-8">
+                <div class="order-simple-card">
+                    <h5 class="card-heading">Product Information</h5>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label">Scan Barcode || product code</label>
+                            <select id="cart_add" class="form-control select2">
+                                <option value="">type product code or name</option>
+                                @foreach($products as $value)
+                                    <option value="{{$value->id}}">{{$value->name}}</option>
+                                @endforeach
+                            </select>
                         </div>
 
-                        <!-- Product Cart Table -->
-                        <div class="col-sm-12">
-                            <table class="table table-bordered table-responsive-sm">
+                        <div class="product-table-wrap mb-3">
+                            <table class="table order-product-table mb-0">
                                 <thead>
                                     <tr>
                                         <th>Image</th>
-                                        <th>Name</th>
-										  <th>Color</th>
-										  <th>Size</th>
-                                        <th>Qty</th>
+                                        <th>Product</th>
+                                        <th>Color</th>
+                                        <th>Size</th>
+                                        <th>Quantity</th>
                                         <th>Sell Price</th>
                                         <th>Admin Price</th>
                                         <th>Discount</th>
@@ -144,164 +293,77 @@
                             </table>
                         </div>
 
-                        <!-- Customer Info -->
-                        <div class="col-sm-6">
+                        <div class="d-flex justify-content-end">
+                            <table class="table table-sm pos-summary-table mb-0">
+                                <tbody id="cart_details">
+                                    <tr>
+                                        <td>Total Amount</td>
+                                        <td class="text-end">{{ $subtotal }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td>Shipping charge</td>
+                                        <td class="text-end">
+                                            <input type="number" min="0" step="0.01" name="shipping_charge" id="shipping_charge" class="form-control form-control-sm text-end d-inline-block quick-select-input" value="{{ number_format((float) $shipping, 2, '.', '') }}" style="max-width: 140px;">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td>Discount</td>
+                                        <td class="text-end">{{ $total_discount }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td><strong>Amount due</strong></td>
+                                        <td class="text-end pos-grand-total"><strong>{{ $total }}</strong></td>
+                                    </tr>
+                                    @if($advancePaid > 0)
+                                        <tr>
+                                            <td><strong>Advance Paid</strong></td>
+                                            <td class="text-end"><strong>{{ number_format($advancePaid, 2) }}</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>Due Amount</strong></td>
+                                            <td class="text-end"><strong>{{ number_format($dueAmount, 2) }}</strong></td>
+                                        </tr>
+                                    @endif
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="payment-box mt-4">
+                            <h6><i class="fa fa-credit-card"></i> Payment Info</h6>
                             <div class="row">
-                                <div class="col-sm-12 mb-2">
-                                    <input type="text" id="name" class="form-control" placeholder="Customer Name" name="name" value="{{$shippinginfo->name}}" required>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Payment Gateway</label>
+                                    <input type="text" class="form-control" value="{{ ucfirst($order->payment_gateway ?? 'N/A') }}" readonly>
                                 </div>
-                                <div class="col-sm-12 mb-2">
-                                    <input type="number" id="phone" class="form-control" placeholder="Customer Number" name="phone" value="{{$shippinginfo->phone}}" required>
-                                </div>
-                                <div class="col-sm-12 mb-3">
-                                    <input type="text" id="address" class="form-control" placeholder="Address" name="address" value="{{$shippinginfo->address}}" required>
-                                </div>
-                                <div class="col-sm-12 mb-3">
-                                    <select id="area" class="form-control" name="area" required>
-                                        <option value="">Delivery Area</option>
-                                        @foreach($shippingcharge as $key=>$value)
-                                            <option value="{{$value->id}}" @if($shippinginfo->area == $value->name) selected @endif>{{$value->name}}</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <div class="col-sm-12 mb-3">
-                                    <select id="order_source" name="order_source" class="form-control">
-                                        <option value="">Select Source</option>
-                                        <option value="Web Site" {{ $orderSourceValue === 'Web Site' ? 'selected' : '' }}>Web Site</option>
-                                        <option value="FB" {{ $orderSourceValue === 'FB' ? 'selected' : '' }}>FB</option>
-                                        <option value="Whatsapp" {{ $orderSourceValue === 'Whatsapp' ? 'selected' : '' }}>Whatsapp</option>
-                                        <option value="Landing Page" {{ $orderSourceValue === 'Landing Page' ? 'selected' : '' }}>Landing Page</option>
-                                        <option value="Messenger" {{ $orderSourceValue === 'Messenger' ? 'selected' : '' }}>Messenger</option>
-                                        <option value="Phone Call" {{ $orderSourceValue === 'Phone Call' ? 'selected' : '' }}>Phone Call</option>
-                                        <option value="Reseller" {{ $orderSourceValue === 'Reseller' ? 'selected' : '' }}>Reseller</option>
-                                        <option value="Imo" {{ $orderSourceValue === 'Imo' ? 'selected' : '' }}>Imo</option>
-                                    </select>
-                                </div>
-                                <div class="col-sm-12 mb-3">
-                                    <textarea id="courier_note" class="form-control" name="courier_note" rows="3" placeholder="Courier Note">{{ $courierNoteValue }}</textarea>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Cart Summary -->
-<div class="col-sm-6">
-    <table class="table table-bordered">
-        <tbody id="cart_details">
-            @php
-                // আগের মতই cart total হিসাব
-                $subtotal = Cart::instance('pos_shopping')->subtotal();
-                $subtotal = str_replace([',','.00'], '', $subtotal);
-                $shipping = Session::get('pos_shipping');
-                $total_discount = Session::get('pos_discount') + Session::get('product_discount');
-
-                $total = ($subtotal + $shipping) - $total_discount;
-
-                // 💳 এই অর্ডারের পেমেন্ট থেকে কত টাকা নেয়া হয়েছে (advance / full)
-                $paidAmount = \App\Models\Payment::where('order_id', $order->id)->sum('amount');
-
-                // ডিফল্ট: মনে করি advance নাই
-                $advancePaid = 0;
-                $dueAmount    = $total;
-
-                // যদি কিছু payment থাকে এবং সেটা total থেকে কম হয় = advance payment
-                if ($paidAmount > 0 && $paidAmount < $total) {
-                    $advancePaid = $paidAmount;
-                    $dueAmount   = $total - $advancePaid;
-                }
-
-                // যদি paidAmount == total হয় → ফুল পেমেন্ট, তখন advance দেখাব না, আগের মতই total থাকবে
-            @endphp
-
-            <tr>
-                <td>Sub Total</td>
-                <td>{{ $subtotal }}</td>
-            </tr>
-            <tr>
-                <td>Shipping Fee</td>
-                <td>
-                    <input
-                        type="number"
-                        min="0"
-                        step="0.01"
-                        name="shipping_charge"
-                        id="shipping_charge"
-                        class="form-control form-control-sm text-end d-inline-block quick-select-input"
-                        value="{{ number_format((float) $shipping, 2, '.', '') }}"
-                        style="max-width: 140px;"
-                    >
-                </td>
-            </tr>
-            <tr>
-                <td>Discount</td>
-                <td>{{ $total_discount }}</td>
-            </tr>
-            <tr>
-                <td><strong>Total</strong></td>
-                <td><strong>{{ $total }}</strong></td>
-            </tr>
-
-            {{-- 🔥 যদি advance payment থাকে তখনই extra দুইটা রো দেখাব --}}
-            @if($advancePaid > 0)
-                <tr>
-                    <td><strong>Advance Paid</strong></td>
-                    <td><strong>{{ number_format($advancePaid, 2) }}</strong></td>
-                </tr>
-                <tr>
-                    <td><strong>Due Amount</strong></td>
-                    <td><strong>{{ number_format($dueAmount, 2) }}</strong></td>
-                </tr>
-            @endif
-        </tbody>
-    </table>
-</div>
-
-
-                        <!-- ✅ Full Width Payment Info Section -->
-                        <div class="col-sm-12 mt-3">
-                            <div class="payment-box w-100">
-                                <h6><i class="fa fa-credit-card"></i> Payment Info</h6>
-                                <div class="row">
-                                    <!-- Gateway -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Payment Gateway</label>
-                                        <input type="text" class="form-control" value="{{ ucfirst($order->payment_gateway ?? 'N/A') }}" readonly>
-                                    </div>
-
-                                    <!-- Status -->
-                                    <div class="col-md-6 mb-3">
-                                        <label class="form-label">Payment Status</label>
-                                        <div class="input-group">
-                                            <select id="payment_status_{{ $order->id }}" class="form-select">
-                                                <option value="pending" {{ $order->payment_status == 'pending' ? 'selected' : '' }}>Pending</option>
-                                                <option value="paid" {{ $order->payment_status == 'paid' ? 'selected' : '' }}>Paid</option>
-                                                <option value="unpaid" {{ $order->payment_status == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
-                                                <option value="failed" {{ $order->payment_status == 'failed' ? 'selected' : '' }}>Failed</option>
-                                            </select>
-                                            <button type="button" class="btn btn-success" onclick="updatePaymentStatus({{ $order->id }})">
-                                                <i class="fa fa-check"></i>
-                                            </button>
-                                        </div>
+                                <div class="col-md-6 mb-3">
+                                    <label class="form-label">Payment Status</label>
+                                    <div class="input-group">
+                                        <select id="payment_status_{{ $order->id }}" class="form-select">
+                                            <option value="pending" {{ $order->payment_status == 'pending' ? 'selected' : '' }}>Pending</option>
+                                            <option value="paid" {{ $order->payment_status == 'paid' ? 'selected' : '' }}>Paid</option>
+                                            <option value="unpaid" {{ $order->payment_status == 'unpaid' ? 'selected' : '' }}>Unpaid</option>
+                                            <option value="failed" {{ $order->payment_status == 'failed' ? 'selected' : '' }}>Failed</option>
+                                        </select>
+                                        <button type="button" class="btn btn-success" onclick="updatePaymentStatus({{ $order->id }})">
+                                            <i class="fa fa-check"></i>
+                                        </button>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                        <!-- ✅ END -->
 
-                        <!-- Submit -->
-                        <div class="col-12 text-end mt-3">
-                            <input type="submit" class="btn btn-success px-4" value="Update Order" />
+                        <div class="text-start mt-3">
+                            <button type="submit" class="btn btn-pos-primary">Update Order</button>
                         </div>
-                    </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
+    </form>
 </div>
 
-<!-- ✅ Toastr + JS -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
 <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-
 <script>
 function updatePaymentStatus(orderId) {
     let status = document.getElementById('payment_status_' + orderId).value;

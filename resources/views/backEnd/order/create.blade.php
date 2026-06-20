@@ -246,155 +246,330 @@
         font-size:13px;
         color:#94a3b8;
     }
+
+    /* Clean order entry layout */
+    body { background: #f3f6f9; }
+    .pos-shell {
+        background: #f3f6f9;
+        padding: 24px 14px 38px;
+    }
+    .pos-header-bar,
+    #product_filter,
+    #product_filter + .pos-suggestion-list,
+    .pos-search-bar {
+        display: none !important;
+    }
+    .pos-shell > .row.mb-2 {
+        margin-bottom: 18px !important;
+    }
+    .pos-shell > .row.mb-2 .d-flex {
+        justify-content: flex-start !important;
+    }
+    .pos-shell > .row.mb-2 form {
+        margin-left: auto;
+    }
+    .order-back-link {
+        background: #15c7aa;
+        color: #fff;
+        border-radius: 4px;
+        display: inline-block;
+        margin-left: 12px;
+        padding: 9px 13px;
+    }
+    .order-back-link:hover {
+        color: #fff;
+        opacity: .92;
+    }
+    .order-simple-shell { padding: 24px 14px 38px; }
+    .order-simple-card {
+        background: #fff;
+        border: 0;
+        border-radius: 8px;
+        overflow: visible;
+    }
+    .order-simple-card .card-heading {
+        border-bottom: 1px solid #edf0f4;
+        color: #1d2636;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        margin: 0;
+        padding: 20px 24px;
+        text-align: center;
+    }
+    .order-simple-card .card-body { padding: 22px 24px 26px; }
+    .order-simple-card label {
+        color: #111827;
+        font-size: 14px;
+        margin-bottom: 9px;
+    }
+    .order-simple-card .form-control,
+    .order-simple-card .form-select {
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        min-height: 46px;
+    }
+    .product-table-wrap { overflow-x: auto; }
+    .order-product-table { min-width: 900px; }
+    .order-product-table thead {
+        background: #f4f6fa;
+        color: #48556a;
+    }
+    .order-product-table th {
+        border: 0 !important;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 15px 10px;
+    }
+    .order-product-table td {
+        border-top: 1px solid #edf0f4;
+        vertical-align: middle;
+    }
+    .pos-card {
+        border: 0;
+        border-radius: 8px;
+        box-shadow: none;
+        padding: 0;
+    }
+    .pos-card .pos-card {
+        border-radius: 8px;
+        height: 100%;
+    }
+    .pos-card .pos-card h5 {
+        border-bottom: 1px solid #edf0f4;
+        color: #1d2636;
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: .06em;
+        margin: -1rem -1rem 20px;
+        padding: 20px 24px;
+        text-align: center;
+        text-transform: capitalize;
+    }
+    .pos-card .pos-card .form-control,
+    .pos-card .pos-card select.form-control {
+        border: 1px solid #e2e8f0;
+        border-radius: 5px;
+        min-height: 46px;
+    }
+    #product_search {
+        min-height: 46px;
+    }
+    .pos-card .table-bordered {
+        border: 0;
+        min-width: 900px;
+    }
+    .pos-card .table-bordered thead {
+        background: #f4f6fa;
+    }
+    .pos-card .table-bordered th {
+        border: 0 !important;
+        color: #48556a;
+        font-size: 13px;
+        font-weight: 700;
+        padding: 15px 10px;
+    }
+    .pos-card .table-bordered td {
+        border-color: #edf0f4;
+        vertical-align: middle;
+    }
+    #cartTable {
+        background: #fff;
+    }
+    #cart_details td {
+        border-color: #edf0f4;
+        padding: 11px 10px;
+    }
+    .pos-summary-table {
+        margin-left: auto;
+        max-width: 430px;
+    }
+    .pos-grand-total {
+        color: #008a2e;
+        font-weight: 800;
+    }
+    .btn-pos-primary {
+        background: #15c7aa;
+        border-radius: 4px;
+        box-shadow: none;
+        padding: 10px 18px;
+    }
+    .btn-pos-primary:hover {
+        color: #fff;
+        opacity: .94;
+    }
+    .pos-validation-alert {
+        display: none;
+        border-radius: 10px;
+        border: 1px solid #fecaca;
+        background: #fef2f2;
+        color: #b91c1c;
+        font-weight: 600;
+        margin-bottom: 16px;
+        padding: 12px 14px;
+    }
+    .pos-validation-alert ul {
+        margin: 0;
+        padding-left: 18px;
+    }
+    .pos-field-error {
+        border-color: #ef4444 !important;
+        box-shadow: 0 0 0 .15rem rgba(239, 68, 68, .12) !important;
+    }
+    @media (max-width: 991.98px) {
+        .pos-shell { padding: 14px 8px 28px; }
+        .pos-card .pos-card h5 {
+            margin-left: -1rem;
+            margin-right: -1rem;
+        }
+    }
 </style>
 <link href="{{asset('public/backEnd')}}/assets/libs/select2/css/select2.min.css" rel="stylesheet" type="text/css" />
 <link href="{{asset('public/backEnd')}}/assets/libs/summernote/summernote-lite.min.css" rel="stylesheet" type="text/css" />
 @endsection
 
 @section('content')
-<div class="container-fluid pos-shell">
-
-    {{-- TOP BAR --}}
-    <div class="row mb-2">
-        <div class="col-12">
-            <div class="d-flex justify-content-between align-items-center">
-                <h4 class="mb-0">Point of Sale</h4>
-                <form method="get" action="{{route('admin.order.cart_clear')}}" class="d-inline">
-                    @csrf
-                    <button type="submit" class="btn btn-sm btn-outline-danger rounded-pill delete-confirm" title="Clear Cart">
-                        <i class="fas fa-trash-alt"></i> Cart Clear
-                    </button>
-                </form>
-            </div>
+<div class="container-fluid order-simple-shell">
+    @if(session('order_create_success'))
+        <div class="alert alert-success border-0 mb-3" role="alert">
+            {{ session('order_create_success') }}
         </div>
-    </div>
-
-    <div class="row g-3">
-        {{-- ================= LEFT COLUMN ================= --}}
-        <div class="col-lg-12">
-            <div class="pos-card h-100">
-
-                {{-- POS HEADER STRIP --}}
-                <div class="pos-header-bar mb-3">
-                    <div>
-                        <h5>Shop Store</h5>
-                        <small class="pos-badge-soft">Walk-in Customer POS</small>
-                    </div>
-                    <div class="text-end">
-                        <div style="font-size:12px;opacity:.8;">Session</div>
-                        <div style="font-weight:600;">SL-{{ date('dmy-His') }}</div>
-                    </div>
-                </div>
-
-                {{-- CUSTOMER + TOTAL --}}
-                <form action="{{route('admin.order.store')}}" method="POST" class="row pos_form" data-parsley-validate="" enctype="multipart/form-data" id="pos_order_form">
-                    @csrf
-                    <input type="hidden" name="coupon_code" value="{{ Session::get('pos_coupon_code', '') }}">
-
-                    {{-- CUSTOMER --}}
-                 
-<div class="row mt-3">
-
-    <!-- LEFT SIDE -->
-    <div class="col-md-4">
-        <div class="pos-card p-3">
-            <h5 class="mb-3">Customer Information</h5>
-
-            <input type="text" name="phone" class="form-control mb-2" placeholder="Customer Phone">
-
-            <input type="text" name="name" class="form-control mb-2" placeholder="Name">
-
-            <input type="text" name="address" class="form-control mb-2" placeholder="Address">
-
-            <select name="area" class="form-control mb-2">
-                <option>Select Delivery Area</option>
-                @foreach($shippingcharge ?? [] as $area)
-                    <option value="{{ $area->id }}">{{ $area->name }}</option>
+    @endif
+    @if($errors->any())
+        <div class="alert alert-danger border-0 mb-3" role="alert">
+            <ul class="mb-0 ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
                 @endforeach
-            </select>
-
-            <select name="order_source" class="form-control mb-2">
-                <option value="">Select Source</option>
-                <option value="Web Site">Web Site</option>
-                <option value="FB">FB</option>
-                <option value="Whatsapp">Whatsapp</option>
-                <option value="Landing Page">Landing Page</option>
-                <option value="Messenger">Messenger</option>
-                <option value="Phone Call">Phone Call</option>
-                <option value="Reseller">Reseller</option>
-                <option value="Imo">Imo</option>
-            </select>
-
-            <textarea name="note" class="form-control" placeholder="Note"></textarea>
+            </ul>
         </div>
+    @endif
+
+    <div class="mb-2 d-flex justify-content-between align-items-center">
+        <a href="{{ route('admin.orders', 'all') }}" class="order-back-link">
+            <i class="fa fa-arrow-left"></i> Back
+        </a>
+        <form method="get" action="{{route('admin.order.cart_clear')}}" class="d-inline">
+            @csrf
+            <button type="submit" class="btn btn-sm btn-outline-danger delete-confirm" title="Clear Cart">
+                <i class="fas fa-trash-alt"></i> Cart Clear
+            </button>
+        </form>
     </div>
 
-    <!-- RIGHT SIDE -->
-    <div class="col-md-8">
-        <div class="pos-card p-3">
-            <h5 class="mb-3">Product Information</h5>
+    <form action="{{route('admin.order.store')}}" method="POST" class="pos_form" data-parsley-validate="" enctype="multipart/form-data" id="pos_order_form">
+        @csrf
+        <input type="hidden" name="coupon_code" value="{{ Session::get('pos_coupon_code', '') }}">
+        <div id="pos_validation_alert" class="pos-validation-alert"></div>
 
-            <div class="pos-autocomplete mb-3">
-                <input type="text" id="product_search" class="form-control" placeholder="Scan Barcode | product code | product name">
-                <div id="product_suggestion_list" class="pos-suggestion-list"></div>
-            </div>
-
-            <table class="table table-bordered">
-                <thead>
-                    <tr>
-                        <th>#</th>
-                        <th>Product</th>
-                        <th>Qty</th>
-                        <th>Sell Price</th>
-                        <th>Admin Price</th>
-                        <th>Discount</th>
-                        <th>Total</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="cartTable">
-                    @include('backEnd.order.cart_table_rows_pos')
-                </tbody>
-            </table>
-
-            <!-- SUMMARY -->
-            <div class="row align-items-end mt-3">
-                <div class="col-md-6">
-                    <table class="table table-sm pos-summary-table mb-0">
-                        <tbody id="cart_details">
-                            @include('backEnd.order.cart_details')
-                        </tbody>
-                    </table>
-                </div>
-                <div class="col-md-6 text-end mt-3 mt-md-0">
-                    <button type="submit" class="btn btn-pos-primary">
-                        Complete Sale
-                    </button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-</div>
-                    {{-- SUMMARY --}}
-                   
-        {{-- ================= RIGHT COLUMN – PRODUCT LIST ================= --}}
-        
-
-                {{-- SEARCH BAR --}}
-                <div class="mb-2">
-                   
-                    <div class="pos-search-bar position-relative">
-                        <span class="icon"><i class="fa fa-search"></i></span>
-                        <input type="text"
-                               id="product_filter"
-                               class="form-control form-control-sm"
-                               placeholder="Search product by name...">
+        <div class="row g-4">
+            <div class="col-lg-4">
+                <div class="order-simple-card">
+                    <h5 class="card-heading">Customer Information</h5>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label class="form-label">Customer Phone</label>
+                            <input type="text" name="phone" class="form-control" placeholder="Enter customer 11 digit mobile number">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Name</label>
+                            <input type="text" name="name" class="form-control" placeholder="Name">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Address</label>
+                            <input type="text" name="address" class="form-control" placeholder="address">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Delivery Area</label>
+                            <select id="area" name="area" class="form-control">
+                                <option value="">Select Delivery Area</option>
+                                @foreach($shippingcharge ?? [] as $area)
+                                    <option value="{{ $area->id }}">{{ $area->name }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Order Source</label>
+                            <select name="order_source" class="form-control">
+                                <option value="">Select Source</option>
+                                <option value="Web Site">Web Site</option>
+                                <option value="FB">FB</option>
+                                <option value="Whatsapp">Whatsapp</option>
+                                <option value="Landing Page">Landing Page</option>
+                                <option value="Messenger">Messenger</option>
+                                <option value="Phone Call">Phone Call</option>
+                                <option value="Reseller">Reseller</option>
+                                <option value="Imo">Imo</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Order Status</label>
+                            <select name="order_status" class="form-control">
+                                @foreach($quickOrderStatuses ?? [] as $status)
+                                    <option value="{{ $status->id }}" {{ strtolower($status->slug ?? $status->name) === 'new' ? 'selected' : '' }}>
+                                        {{ $status->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <div class="mb-0">
+                            <label class="form-label">Note</label>
+                            <textarea name="note" class="form-control" rows="2" placeholder="note"></textarea>
+                        </div>
                     </div>
                 </div>
+            </div>
 
+            <div class="col-lg-8">
+                <div class="order-simple-card">
+                    <h5 class="card-heading">Product Information</h5>
+                    <div class="card-body">
+                        <div class="mb-4">
+                            <label class="form-label">Scan Barcode || product code</label>
+                            <div class="pos-autocomplete">
+                                <input type="text" id="product_search" class="form-control" placeholder="type product code or name">
+                                <div id="product_suggestion_list" class="pos-suggestion-list"></div>
+                            </div>
+                        </div>
+
+                        <div class="product-table-wrap mb-3">
+                            <table class="table order-product-table mb-0">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Product</th>
+                                        <th>Qty</th>
+                                        <th>Sell Price</th>
+                                        <th>Admin Price</th>
+                                        <th>Discount</th>
+                                        <th>Total</th>
+                                        <th>Action</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cartTable">
+                                    @include('backEnd.order.cart_table_rows_pos')
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="d-flex justify-content-end">
+                            <table class="table table-sm pos-summary-table mb-0">
+                                <tbody id="cart_details">
+                                    @include('backEnd.order.cart_details')
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div class="text-start mt-3">
+                            <button type="submit" class="btn btn-pos-primary">Complete Sale</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
 @endsection
-
 @section('script')
 <script src="{{asset('public/backEnd/')}}/assets/libs/parsleyjs/parsley.min.js"></script>
 <script src="{{asset('public/backEnd/')}}/assets/js/pages/form-validation.init.js"></script>
@@ -686,6 +861,40 @@
         if (posFormSubmitting) return;
         e.preventDefault();
         var form = this;
+        var errors = [];
+        var $phone = $('[name="phone"]');
+        var $name = $('[name="name"]');
+        var $address = $('[name="address"]');
+        var phoneDigits = ($phone.val() || '').replace(/\D/g, '');
+
+        $(".pos-field-error").removeClass("pos-field-error");
+
+        if (phoneDigits.length !== 11) {
+            errors.push('Customer phone number must be 11 digits.');
+            $phone.addClass('pos-field-error');
+        }
+        if (!$.trim($name.val() || '')) {
+            errors.push('Customer name is required.');
+            $name.addClass('pos-field-error');
+        }
+        if (!$.trim($address.val() || '')) {
+            errors.push('Customer address is required.');
+            $address.addClass('pos-field-error');
+        }
+        if ($("#cartTable tr").length === 0) {
+            errors.push('Please select at least one product.');
+            $("#product_search").addClass('pos-field-error');
+        }
+
+        if (errors.length) {
+            $("#pos_validation_alert")
+                .html('<ul><li>' + errors.join('</li><li>') + '</li></ul>')
+                .show();
+            $('html, body').animate({ scrollTop: $("#pos_validation_alert").offset().top - 90 }, 250);
+            return;
+        }
+
+        $("#pos_validation_alert").hide().empty();
         var rows = [];
         $(".cart-size-selector, .cart-color-selector").each(function () {
             var rowId = $(this).data("id");

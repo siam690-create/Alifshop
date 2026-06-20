@@ -3573,26 +3573,37 @@ class OrderController extends Controller
 
         $cartinfo       = Cart::instance('pos_shopping')->content();
         $shippingcharge = ShippingCharge::where('status', 1)->get();
+        $quickOrderStatuses = OrderStatus::query()
+            ->whereIn('slug', ['new', 'pending', 'processing'])
+            ->orWhereIn('name', ['New', 'Pending', 'Processing'])
+            ->orderByRaw("CASE
+                WHEN LOWER(slug) = 'new' OR LOWER(name) = 'new' THEN 1
+                WHEN LOWER(slug) = 'pending' OR LOWER(name) = 'pending' THEN 2
+                WHEN LOWER(slug) = 'processing' OR LOWER(name) = 'processing' THEN 3
+                ELSE 4 END")
+            ->get();
 
         return view('backEnd.order.create', compact(
             'products',
             'cartinfo',
-            'shippingcharge'
+            'shippingcharge',
+            'quickOrderStatuses'
         ));
     }
 
     public function order_store(Request $request)
     {
         $this->validate($request, [
-            'name'    => 'required',
-            'phone'   => 'required',
-            'address' => 'required',
+            'name'    => 'required|string',
+            'phone'   => 'required|digits:11',
+            'address' => 'required|string',
             'area'    => 'required',
+            'order_status' => 'nullable|exists:order_statuses,id',
         ]);
 
         if (Cart::instance('pos_shopping')->count() <= 0) {
-            Toastr::error('Your shopping empty', 'Failed!');
-            return redirect()->back();
+            Toastr::error('Please select at least one product.', 'Failed!');
+            return redirect()->back()->withErrors(['product' => 'Please select at least one product.'])->withInput();
         }
 
         $subtotalRaw = Cart::instance('pos_shopping')->subtotal();
@@ -3630,7 +3641,7 @@ class OrderController extends Controller
         $order->discount        = $discount ? $discount : 0;
         $order->shipping_charge = isset($shippingfee->amount) ? $shippingfee->amount : 0;
         $order->customer_id     = $customer_id;
-        $order->order_status    = 1;
+        $order->order_status    = (int) ($request->order_status ?: (OrderStatus::where('slug', 'new')->value('id') ?: 1));
         if (Schema::hasColumn('orders', 'created_by')) {
             $order->created_by = Auth::guard('admin')->id() ?: auth()->id();
         }
@@ -3719,8 +3730,8 @@ class OrderController extends Controller
         Cart::instance('pos_shopping')->destroy();
         Session::forget(['pos_shipping', 'pos_discount', 'pos_coupon_code', 'product_discount']);
 
-        Toastr::success('Thanks, Your order place successfully', 'Success!');
-        return redirect('admin/order/pending');
+        Toastr::success('Order created successfully', 'Success!');
+        return redirect()->route('admin.order.create')->with('order_create_success', 'Order created successfully.');
     }
 
     public function cart_add(Request $request)
@@ -4276,13 +4287,23 @@ class OrderController extends Controller
         }
 
         $cartinfo = Cart::instance('pos_shopping')->content();
+        $quickOrderStatuses = OrderStatus::query()
+            ->whereIn('slug', ['new', 'pending', 'processing'])
+            ->orWhereIn('name', ['New', 'Pending', 'Processing'])
+            ->orderByRaw("CASE
+                WHEN LOWER(slug) = 'new' OR LOWER(name) = 'new' THEN 1
+                WHEN LOWER(slug) = 'pending' OR LOWER(name) = 'pending' THEN 2
+                WHEN LOWER(slug) = 'processing' OR LOWER(name) = 'processing' THEN 3
+                ELSE 4 END")
+            ->get();
 
         return view('backEnd.order.edit', compact(
             'products',
             'cartinfo',
             'shippingcharge',
             'shippinginfo',
-            'order'
+            'order',
+            'quickOrderStatuses'
         ));
     }
 
@@ -4293,6 +4314,7 @@ class OrderController extends Controller
             'phone'   => 'required',
             'address' => 'required',
             'area'    => 'required',
+            'order_status' => 'nullable|exists:order_statuses,id',
         ]);
 
         if (Cart::instance('pos_shopping')->count() <= 0) {
@@ -4325,6 +4347,7 @@ class OrderController extends Controller
         $orderSource = trim((string) $request->order_source);
         $courierNote = trim((string) $request->courier_note);
         $originalOrderStatus = (int) $order->order_status;
+        $selectedOrderStatus = (int) ($request->order_status ?: $originalOrderStatus);
         $newShippingCharge = $request->filled('shipping_charge')
             ? max(0, (float) $request->shipping_charge)
             : (isset($shippingfee->amount) ? (float) $shippingfee->amount : 0);
@@ -4343,12 +4366,11 @@ class OrderController extends Controller
         $order->discount        = $discount;
         $order->shipping_charge = $newShippingCharge;
         $order->customer_id     = $customer->id;
-        $order->order_status    = 1; // এখানে চাইলে স্টক হ্যান্ডেল করতে চাইলে handleStockChange আরও কেয়ারফুললি ব্যবহার করতে হবে
+        $order->order_status    = $selectedOrderStatus;
         $order->note            = $orderSource !== '' ? $orderSource : null;
         if (Schema::hasColumn('orders', 'order_note')) {
             $order->order_note = $courierNote !== '' ? $courierNote : null;
         }
-        $order->order_status    = $originalOrderStatus;
         $order->save();
 
         $shipping           = Shipping::where('order_id', $order->id)->firstOrFail();
