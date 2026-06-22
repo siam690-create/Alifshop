@@ -81,7 +81,10 @@
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="page-title mb-0" style="font-weight: 700; color: #2d3436;">Tracking Pixels</h4>
-                <p class="text-muted font-size-13 mb-0">Manage your Facebook/Google pixels.</p>
+                <p class="text-muted font-size-13 mb-0">
+                    Manage browser pixels. Server-side Facebook CAPI settings are managed from
+                    <a href="{{ route('admin.facebook_capi.edit') }}">Facebook CAPI</a>.
+                </p>
             </div>
             <a href="{{route('pixels.create')}}" class="btn btn-primary rounded-pill shadow-sm px-4">
                 <i class="fe-plus me-1"></i> Add Pixel
@@ -99,7 +102,6 @@
                                 <th style="width: 50px;">SL</th>
                                 <th>Pixel ID / Code</th>
                                 <th>Browser</th>
-                                <th>Server CAPI</th>
                                 <th>Status</th>
                                 <th class="text-end" style="width: 150px;">Action</th>
                             </tr>
@@ -115,14 +117,6 @@
 
                                 <td>
                                     @if(($value->browser_tracking_enabled ?? 1) == 1)
-                                        <span class="badge badge-pill badge-soft-success">On</span>
-                                    @else
-                                        <span class="badge badge-pill badge-soft-danger">Off</span>
-                                    @endif
-                                </td>
-
-                                <td>
-                                    @if(($value->server_tracking_enabled ?? 0) == 1)
                                         <span class="badge badge-pill badge-soft-success">On</span>
                                     @else
                                         <span class="badge badge-pill badge-soft-danger">Off</span>

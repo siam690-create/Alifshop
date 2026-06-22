@@ -129,32 +129,6 @@
                         </div>
 
                         <div class="form-group mb-4">
-                            <label for="access_token" class="form-label">Conversions API Access Token</label>
-                            <textarea class="form-control @error('access_token') is-invalid @enderror"
-                                      name="access_token" id="access_token" rows="3"
-                                      placeholder="Paste Meta Conversions API access token">{{ old('access_token', $edit_data->access_token ?? '') }}</textarea>
-                            <small class="text-muted d-block mt-2">
-                                Server-side tracking চালাতে Meta Events Manager থেকে generated access token দিন।
-                            </small>
-                            @error('access_token')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group mb-4">
-                            <label for="test_event_code" class="form-label">Test Event Code <span class="text-muted">(optional)</span></label>
-                            <input type="text" class="form-control @error('test_event_code') is-invalid @enderror"
-                                   name="test_event_code" value="{{ old('test_event_code', $edit_data->test_event_code ?? '') }}" id="test_event_code"
-                                   placeholder="e.g. TEST12345">
-                            <small class="text-muted d-block mt-2">
-                                Test Events tab-এ verify করার সময় লাগবে। Live হলে blank রাখা যায়।
-                            </small>
-                            @error('test_event_code')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
-                        </div>
-
-                        <div class="form-group mb-4">
                             <div class="d-flex justify-content-between align-items-center border p-3 rounded bg-light">
                                 <div>
                                     <label class="form-label mb-0 text-dark">Browser Pixel Tracking</label>
@@ -162,19 +136,6 @@
                                 </div>
                                 <label class="switch">
                                     <input type="checkbox" name="browser_tracking_enabled" value="1" @if(($edit_data->browser_tracking_enabled ?? 1) == 1) checked @endif>
-                                    <span class="slider round"></span>
-                                </label>
-                            </div>
-                        </div>
-
-                        <div class="form-group mb-4">
-                            <div class="d-flex justify-content-between align-items-center border p-3 rounded bg-light">
-                                <div>
-                                    <label class="form-label mb-0 text-dark">Server Side Tracking</label>
-                                    <small class="d-block text-muted">Order হলে backend থেকে Meta CAPI Purchase event যাবে।</small>
-                                </div>
-                                <label class="switch">
-                                    <input type="checkbox" name="server_tracking_enabled" value="1" @if(($edit_data->server_tracking_enabled ?? 0) == 1) checked @endif>
                                     <span class="slider round"></span>
                                 </label>
                             </div>

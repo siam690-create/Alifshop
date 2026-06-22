@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\FacebookCapiSetting;
+use App\Models\Order;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -12,6 +13,7 @@ class FacebookCapiService
     protected $accessToken;
     protected $pixelId;
     protected $testEventCode;
+    protected $setting;
     protected $initialized = false;
 
     /**
@@ -34,6 +36,7 @@ class FacebookCapiService
         }
 
         if ($dbSetting) {
+            $this->setting = $dbSetting;
             $this->accessToken = $dbSetting->access_token;
             $this->pixelId = $dbSetting->pixel_id;
             $this->testEventCode = $dbSetting->test_event_code;
@@ -44,6 +47,123 @@ class FacebookCapiService
         }
 
         $this->initialized = true;
+    }
+
+    public function activeSetting(): ?FacebookCapiSetting
+    {
+        $this->initialize();
+
+        return $this->setting;
+    }
+
+    public function shouldSendPurchaseForContext(string $context): bool
+    {
+        $this->initialize();
+
+        $trigger = $this->setting->purchase_trigger ?? 'order_created';
+
+        return $trigger === $context;
+    }
+
+    public function shouldSendPurchaseForStatus($status): bool
+    {
+        $this->initialize();
+
+        $trigger = $this->setting->purchase_trigger ?? 'order_created';
+        $statusText = strtolower(trim((string) $status));
+
+        $aliases = [
+            'order_confirmed' => ['pending', 'processing', 'confirmed', 'confirm', 'accepted'],
+            'shipped' => ['shipped', 'ship', 'in courier', 'on the way', 'courier'],
+            'delivered' => ['delivered', 'completed', 'complete'],
+        ];
+
+        return in_array($statusText, $aliases[$trigger] ?? [], true);
+    }
+
+    public function sendPurchaseForOrder(Order $order, string $context = 'order_created', $amount = null, ?string $sourceUrl = null)
+    {
+        $this->initialize();
+
+        if (!$this->shouldSendPurchaseForContext($context)) {
+            return false;
+        }
+
+        return $this->dispatchPurchaseForOrder($order, $amount, $sourceUrl, $context);
+    }
+
+    public function sendPurchaseForOrderStatus(Order $order, $status, $amount = null, ?string $sourceUrl = null)
+    {
+        $this->initialize();
+
+        if (!$this->shouldSendPurchaseForStatus($status)) {
+            return false;
+        }
+
+        return $this->dispatchPurchaseForOrder($order, $amount, $sourceUrl, $this->setting->purchase_trigger ?? 'order_created');
+    }
+
+    protected function dispatchPurchaseForOrder(Order $order, $amount = null, ?string $sourceUrl = null, string $context = 'order_created')
+    {
+        $cacheKey = 'facebook_capi_purchase_sent_' . $order->id;
+
+        if (Cache::has($cacheKey)) {
+            Log::info('Facebook CAPI: Purchase skipped because it was already sent', [
+                'order_id' => $order->id,
+                'invoice_id' => $order->invoice_id,
+            ]);
+            return false;
+        }
+
+        $order->loadMissing(['customer', 'shipping', 'orderdetails']);
+
+        $shipping = $order->shipping;
+        $customer = $order->customer;
+        $userData = $this->getUserDataFromRequest();
+
+        if ($customer && $customer->email) {
+            $userData['email'] = $customer->email;
+        }
+
+        $phone = $shipping->phone ?? $customer->phone ?? null;
+        if ($phone) {
+            $userData['phone'] = $phone;
+        }
+        $userData['country_code'] = 'BD';
+
+        $name = $shipping->name ?? $customer->name ?? null;
+        if ($name) {
+            $nameParts = explode(' ', trim($name), 2);
+            $userData['first_name'] = $nameParts[0] ?? null;
+            $userData['last_name'] = $nameParts[1] ?? null;
+        }
+
+        $contents = $order->orderdetails->map(function ($detail) {
+            return [
+                'id' => (string) ($detail->product_id ?? $detail->id),
+                'quantity' => (int) ($detail->qty ?? 1),
+                'item_price' => (float) ($detail->sale_price ?? 0),
+            ];
+        })->values()->all();
+
+        $result = $this->sendEvent('Purchase', [
+            'currency' => 'BDT',
+            'value' => (float) ($amount ?? $order->customer_payable_amount ?? $order->amount ?? 0),
+            'order_id' => (string) ($order->invoice_id ?? $order->id),
+            'content_ids' => collect($contents)->pluck('id')->all(),
+            'contents' => $contents,
+            'num_items' => (int) $order->orderdetails->sum('qty'),
+        ], $userData, [
+            'event_id' => 'purchase_' . $order->id,
+            'event_source_url' => $sourceUrl ?: request()->fullUrl(),
+            'purchase_trigger_context' => $context,
+        ]);
+
+        if (is_array($result) && ($result['success'] ?? false)) {
+            Cache::put($cacheKey, true, now()->addDays(45));
+        }
+
+        return $result;
     }
 
     /**
@@ -83,6 +203,14 @@ class FacebookCapiService
             ];
 
             // Add event ID if provided (for deduplication)
+            if ($eventName === 'Purchase' && !$this->shouldSendPurchaseForContext($options['purchase_trigger_context'] ?? 'order_created')) {
+                Log::info('Facebook CAPI: Purchase skipped due to trigger setting', [
+                    'trigger' => $this->setting->purchase_trigger ?? 'order_created',
+                    'context' => $options['purchase_trigger_context'] ?? 'order_created',
+                ]);
+                return false;
+            }
+
             if (isset($options['event_id'])) {
                 $eventPayload['event_id'] = $options['event_id'];
             } elseif (isset($data['event_id'])) {
@@ -100,12 +228,11 @@ class FacebookCapiService
                 $requestPayload['test_event_code'] = $this->testEventCode;
             }
 
-            // Send to Facebook Conversion API (very short timeout - don't block order submission)
+            // Send to Facebook Conversion API without blocking checkout for too long.
             $url = "https://graph.facebook.com/v21.0/{$this->pixelId}/events";
             
-            // Use very short timeout (0.5 seconds) - if it takes longer, fail silently and don't block order
             try {
-                $response = Http::timeout(0.5)->post($url, $requestPayload);
+                $response = Http::connectTimeout(1)->timeout(2)->post($url, $requestPayload);
 
                 if ($response->successful()) {
                     $responseData = $response->json();
@@ -182,6 +309,9 @@ class FacebookCapiService
         // Phone (hashed)
         if (isset($userData['phone'])) {
             $phone = preg_replace('/[^0-9]/', '', $userData['phone']);
+            if (strlen($phone) === 11 && str_starts_with($phone, '01')) {
+                $phone = '88' . $phone;
+            }
             if (!empty($phone) && strlen($phone) < 64) {
                 $prepared['ph'] = hash('sha256', $phone);
             }

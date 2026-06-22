@@ -279,7 +279,8 @@ if($order) {
                             'value' => $payment->amount ?? $order->amount,
                             'order_id' => $order->invoice_id ?? $order->id,
                         ], $userData, [
-                            'event_id' => 'order_' . $order->id . '_' . time(),
+                            'event_id' => 'purchase_' . $order->id,
+                            'purchase_trigger_context' => 'order_created',
                             'event_source_url' => request()->fullUrl(),
                         ]);
                     } catch (\Exception $e) {

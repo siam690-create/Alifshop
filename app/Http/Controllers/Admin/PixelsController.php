@@ -5,7 +5,6 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\EcomPixel;
-use App\Models\FacebookCapiSetting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Schema;
 use Toastr;
@@ -24,11 +23,9 @@ class PixelsController extends Controller
     {
         $this->validate($request, [
             'code' => 'required|string|max:255',
-            'access_token' => 'nullable|string',
-            'test_event_code' => 'nullable|string|max:255',
         ]);
         EcomPixel::create($this->pixelPayload($request));
-        $this->syncFacebookCapiSetting();
+        Cache::forget('pixels_list');
         Toastr::success('Success','Data insert successfully');
         return redirect()->route('pixels.index');
     }
@@ -43,12 +40,10 @@ class PixelsController extends Controller
     {
         $this->validate($request, [
             'code' => 'required|string|max:255',
-            'access_token' => 'nullable|string',
-            'test_event_code' => 'nullable|string|max:255',
         ]);
         $update_data = EcomPixel::findOrFail($request->hidden_id);
         $update_data->update($this->pixelPayload($request));
-        $this->syncFacebookCapiSetting();
+        Cache::forget('pixels_list');
 
         Toastr::success('Success','Data update successfully');
         return redirect()->route('pixels.index');
@@ -59,7 +54,7 @@ class PixelsController extends Controller
         $inactive =EcomPixel::find($request->hidden_id);
         $inactive->status = 0;
         $inactive->save();
-        $this->syncFacebookCapiSetting();
+        Cache::forget('pixels_list');
         Toastr::success('Success','Data inactive successfully');
         return redirect()->back();
     }
@@ -68,7 +63,7 @@ class PixelsController extends Controller
         $active =EcomPixel::find($request->hidden_id);
         $active->status = 1;
         $active->save();
-        $this->syncFacebookCapiSetting();
+        Cache::forget('pixels_list');
         Toastr::success('Success','Data active successfully');
         return redirect()->back();
     }
@@ -76,7 +71,7 @@ class PixelsController extends Controller
     {
         $delete_data =EcomPixel::find($request->hidden_id);
         $delete_data->delete();
-        $this->syncFacebookCapiSetting();
+        Cache::forget('pixels_list');
         Toastr::success('Success','Data delete successfully');
         return redirect()->back();
     }
@@ -88,75 +83,10 @@ class PixelsController extends Controller
             'status' => $request->has('status') ? 1 : 0,
         ];
 
-        if (Schema::hasColumn('ecom_pixels', 'access_token')) {
-            $payload['access_token'] = $request->access_token;
-        }
-
-        if (Schema::hasColumn('ecom_pixels', 'test_event_code')) {
-            $payload['test_event_code'] = $request->test_event_code;
-        }
-
         if (Schema::hasColumn('ecom_pixels', 'browser_tracking_enabled')) {
             $payload['browser_tracking_enabled'] = $request->has('browser_tracking_enabled') ? 1 : 0;
         }
 
-        if (Schema::hasColumn('ecom_pixels', 'server_tracking_enabled')) {
-            $payload['server_tracking_enabled'] = $request->has('server_tracking_enabled') ? 1 : 0;
-        }
-
         return $payload;
-    }
-
-    protected function syncFacebookCapiSetting(): void
-    {
-        $existing = FacebookCapiSetting::first();
-        $hasServerTrackingColumn = Schema::hasColumn('ecom_pixels', 'server_tracking_enabled');
-        $hasAccessTokenColumn = Schema::hasColumn('ecom_pixels', 'access_token');
-
-        if (!$hasServerTrackingColumn || !$hasAccessTokenColumn) {
-            if ($existing) {
-                $existing->update(['status' => 0]);
-            }
-
-            Cache::forget('facebook_capi_settings');
-            Cache::forget('pixels_list');
-            return;
-        }
-
-        $pixel = EcomPixel::where('status', 1)
-            ->where('server_tracking_enabled', 1)
-            ->whereNotNull('access_token')
-            ->where('access_token', '!=', '')
-            ->latest('id')
-            ->first();
-
-        if (!$pixel) {
-            if ($existing) {
-                $existing->update(['status' => 0]);
-            }
-
-            Cache::forget('facebook_capi_settings');
-            Cache::forget('pixels_list');
-            return;
-        }
-
-        if ($existing) {
-            $existing->update([
-                'pixel_id' => $pixel->code,
-                'access_token' => $pixel->access_token,
-                'test_event_code' => $pixel->test_event_code,
-                'status' => 1,
-            ]);
-        } else {
-            FacebookCapiSetting::create([
-                'pixel_id' => $pixel->code,
-                'access_token' => $pixel->access_token,
-                'test_event_code' => $pixel->test_event_code,
-                'status' => 1,
-            ]);
-        }
-
-        Cache::forget('facebook_capi_settings');
-        Cache::forget('pixels_list');
     }
 }

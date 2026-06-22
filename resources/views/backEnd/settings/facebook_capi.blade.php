@@ -74,6 +74,23 @@
         width: 3rem;
         height: 1.5rem;
     }
+    .trigger-option {
+        border: 1px solid #eef2f7;
+        border-radius: 10px;
+        padding: 14px 16px;
+        margin-bottom: 10px;
+        cursor: pointer;
+        transition: .2s ease;
+    }
+    .trigger-option:has(input:checked) {
+        border-color: #635bff;
+        background: rgba(99, 91, 255, .05);
+    }
+    .trigger-title {
+        color: #1f2937;
+        font-weight: 700;
+        margin-bottom: 2px;
+    }
 </style>
 @endsection
 
@@ -162,6 +179,70 @@
                                 Events Manager &gt; Test Events থেকে পাওয়া Test Event Code (যদি ব্যবহার করেন)।
                             </small>
                             @error('test_event_code')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        @php
+                            $selectedTrigger = old('purchase_trigger', $setting->purchase_trigger ?? 'order_created');
+                            $triggerOptions = [
+                                'order_created' => [
+                                    'title' => 'Order placed',
+                                    'help' => 'Best for COD/prepaid ecommerce. Purchase sends as soon as order is created.',
+                                ],
+                                'order_confirmed' => [
+                                    'title' => 'Order confirmed',
+                                    'help' => 'Purchase sends when status becomes Pending/Processing/Confirmed.',
+                                ],
+                                'shipped' => [
+                                    'title' => 'Courier shipped',
+                                    'help' => 'Purchase sends when status becomes Shipped/In Courier/On The Way.',
+                                ],
+                                'delivered' => [
+                                    'title' => 'Delivered completed',
+                                    'help' => 'Highest accuracy, but may send late if delivery update is delayed.',
+                                ],
+                            ];
+                        @endphp
+                        <div class="mb-4">
+                            <label class="form-label">Purchase Event Trigger</label>
+                            <div class="small-help mb-2">Choose when Facebook CAPI should send the Purchase event.</div>
+                            @foreach($triggerOptions as $triggerValue => $trigger)
+                                <label class="trigger-option d-flex gap-2 align-items-start">
+                                    <input
+                                        class="form-check-input mt-1"
+                                        type="radio"
+                                        name="purchase_trigger"
+                                        value="{{ $triggerValue }}"
+                                        {{ $selectedTrigger === $triggerValue ? 'checked' : '' }}
+                                    >
+                                    <span>
+                                        <span class="trigger-title d-block">{{ $trigger['title'] }}</span>
+                                        <span class="small-help">{{ $trigger['help'] }}</span>
+                                    </span>
+                                </label>
+                            @endforeach
+                            @error('purchase_trigger')
+                                <div class="text-danger small mt-1">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="domain_verification_token">
+                                Facebook Domain Verification Token (optional)
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control @error('domain_verification_token') is-invalid @enderror"
+                                id="domain_verification_token"
+                                name="domain_verification_token"
+                                value="{{ old('domain_verification_token', $setting->domain_verification_token ?? '') }}"
+                                placeholder="Paste only the content value from Meta verification meta tag"
+                            >
+                            <small class="small-help">
+                                Meta Business Settings থেকে পাওয়া meta tag-এর content value দিন. Save করলে frontend head-এ automatically add হবে.
+                            </small>
+                            @error('domain_verification_token')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

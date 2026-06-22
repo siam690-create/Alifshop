@@ -29,7 +29,16 @@
 <link rel="stylesheet" href="{{ url('/responsive.css') }}?v=1">
         <link rel="stylesheet" href="{{asset('public/frontEnd/css/main.css')}}" />
         <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
-        <meta name="facebook-domain-verification" content="38f1w8335btoklo88dyfl63ba3st2e" />
+        @php
+            $facebookDomainToken = \Illuminate\Support\Facades\Cache::remember('facebook_capi_domain_verification_token', 3600, function () {
+                try {
+                    return optional(\App\Models\FacebookCapiSetting::where('status', 1)->first())->domain_verification_token;
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            });
+        @endphp
+        <meta name="facebook-domain-verification" content="{{ $facebookDomainToken ?: '38f1w8335btoklo88dyfl63ba3st2e' }}" />
         <style>
             .float{
             	position:fixed;

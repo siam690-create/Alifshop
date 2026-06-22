@@ -34,6 +34,7 @@ use App\Models\VendorWallet;
 use App\Models\VendorWalletTransaction;
 use App\Helpers\FundHelper;
 use App\Models\Expense;
+use App\Services\FacebookCapiService;
 use App\Services\RedXService;
 
 use Illuminate\Support\Facades\Auth;
@@ -659,6 +660,22 @@ class OrderController extends Controller
         }
 
         return (string) (OrderStatus::where('id', $statusId)->value('name') ?? ('Status #' . $statusId));
+    }
+
+    private function maybeSendFacebookCapiPurchaseForStatus(Order $order, int $statusId): void
+    {
+        $statusName = $this->resolveOrderStatusName($statusId);
+
+        try {
+            app(FacebookCapiService::class)->sendPurchaseForOrderStatus(
+                $order,
+                $statusName,
+                $order->customer_payable_amount ?? $order->amount,
+                request()->fullUrl()
+            );
+        } catch (\Throwable $e) {
+            Log::error('Facebook CAPI Purchase status trigger failed for order ' . $order->id . ': ' . $e->getMessage());
+        }
     }
 
     private function buildOrderHistoryChanges(array $before, array $after): array
@@ -2341,6 +2358,7 @@ class OrderController extends Controller
 
         // Handle stock change
         $this->handleStockChange($order, $oldStatus, $newStatus);
+        $this->maybeSendFacebookCapiPurchaseForStatus($order, $newStatus);
 
         \Log::info('Order status manually updated', [
             'order_id' => $order->id,
@@ -2392,6 +2410,7 @@ class OrderController extends Controller
 
         // স্টক হ্যান্ডেল
         $this->handleStockChange($order, $oldStatus, $newStatus);
+        $this->maybeSendFacebookCapiPurchaseForStatus($order, $newStatus);
 
         $shipping_update = Shipping::where('order_id', $order->id)->first();
         $shippingfee     = ShippingCharge::find($request->area);
@@ -2714,6 +2733,7 @@ class OrderController extends Controller
 
             // স্টক হ্যান্ডেল
             $this->handleStockChange($order, $oldStatus, $targetStatus);
+            $this->maybeSendFacebookCapiPurchaseForStatus($order, $targetStatus);
 
             // ✅ Use eager loaded customer instead of find()
             if ($sms_gateway && $order->customer) {

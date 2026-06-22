@@ -290,8 +290,10 @@ window.dataLayer = window.dataLayer || [];
 window.dataLayer.push({ ecommerce: null });
 window.dataLayer.push({
     event: "purchase",
+    event_id: @json('purchase_' . $order->id),
     ecommerce: {
         transaction_id: @json((string) ($order->invoice_id ?? $order->id)),
+        event_id: @json('purchase_' . $order->id),
         currency: "BDT",
         value: {{ (float) $grand_total }},
         tax: 0,
