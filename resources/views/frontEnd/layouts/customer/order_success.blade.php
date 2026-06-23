@@ -303,6 +303,24 @@ window.dataLayer.push({
     }
 });
 
+if (window.ttq) {
+    window.ttq.track('CompletePayment', {
+        content_type: 'product',
+        contents: @json($purchaseItems->map(function ($item) {
+            return [
+                'content_id' => $item['item_id'],
+                'content_name' => $item['item_name'],
+                'quantity' => $item['quantity'],
+                'price' => $item['price'],
+            ];
+        })->values()),
+        currency: 'BDT',
+        value: {{ (float) $grand_total }}
+    }, {
+        event_id: @json('purchase_' . $order->id)
+    });
+}
+
 function downloadPDF() {
     const element = document.getElementById('invoice-pdf-area');
     const invoice_id = "{{ $order->invoice_id }}";

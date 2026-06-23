@@ -38,6 +38,10 @@ class FacebookCapiSettingController extends Controller
             'test_event_code' => 'nullable|string|max:255',
             'purchase_trigger' => ['nullable', Rule::in(['order_created', 'order_confirmed', 'shipped', 'delivered'])],
             'domain_verification_token' => 'nullable|string|max:255',
+            'tiktok_pixel_id' => 'nullable|string|max:255',
+            'tiktok_access_token' => 'nullable|string',
+            'tiktok_test_event_code' => 'nullable|string|max:255',
+            'tiktok_status' => 'nullable|boolean',
             'status'          => 'nullable|boolean',
         ]);
 
@@ -47,6 +51,10 @@ class FacebookCapiSettingController extends Controller
             'test_event_code' => $request->test_event_code,
             'purchase_trigger' => $request->purchase_trigger ?: 'order_created',
             'domain_verification_token' => $request->domain_verification_token,
+            'tiktok_pixel_id' => $request->tiktok_pixel_id,
+            'tiktok_access_token' => $request->tiktok_access_token,
+            'tiktok_test_event_code' => $request->tiktok_test_event_code,
+            'tiktok_status' => $request->has('tiktok_status') ? 1 : 0,
             'status'          => $request->has('status') ? 1 : 0,
         ];
 
@@ -61,8 +69,10 @@ class FacebookCapiSettingController extends Controller
         // Clear cache so new settings are loaded immediately
         Cache::forget('facebook_capi_settings');
         Cache::forget('facebook_capi_domain_verification_token');
+        Cache::forget('tiktok_events_api_settings');
+        Cache::forget('tiktok_browser_pixel_id');
 
-        Toastr::success('Facebook Conversion API settings updated successfully', 'Success');
+        Toastr::success('Tracking API settings updated successfully', 'Success');
 
         return redirect()->route('admin.facebook_capi.edit');
     }

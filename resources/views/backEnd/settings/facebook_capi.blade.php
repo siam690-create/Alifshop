@@ -1,5 +1,5 @@
 @extends('backEnd.layouts.master')
-@section('title','Facebook Conversion API Settings')
+@section('title','FB/TikTok CAPI Settings')
 
 @section('css')
 <style>
@@ -100,10 +100,10 @@
         <div class="col-12 d-flex justify-content-between align-items-center">
             <div>
                 <h4 class="page-title mb-0" style="font-weight: 700; color: #2d3436;">
-                    Facebook Conversion API Settings
+                    FB/TikTok CAPI Settings
                 </h4>
                 <p class="text-muted font-size-13 mb-0">
-                    এখানে Facebook CAPI এর Pixel ID এবং Access Token সংরক্ষণ করবেন।
+                    Facebook CAPI and TikTok Events API credentials manage করুন।
                 </p>
             </div>
         </div>
@@ -259,6 +259,80 @@
                             <label class="form-check-label" for="status">
                                 Facebook CAPI Active রাখুন
                             </label>
+                        </div>
+
+                        <div class="card mt-4 mb-4 border">
+                            <div class="card-header">
+                                <div class="header-icon">
+                                    <i class="fab fa-tiktok"></i>
+                                </div>
+                                <div>
+                                    <h5 class="card-title mb-1">TikTok Pixel & Events API</h5>
+                                    <p class="small-help mb-0">Add TikTok Pixel ID and Events API token for browser + server-side purchase tracking.</p>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div class="mb-3">
+                                    <label class="form-label" for="tiktok_pixel_id">TikTok Pixel ID</label>
+                                    <input
+                                        type="text"
+                                        class="form-control @error('tiktok_pixel_id') is-invalid @enderror"
+                                        id="tiktok_pixel_id"
+                                        name="tiktok_pixel_id"
+                                        value="{{ old('tiktok_pixel_id', $setting->tiktok_pixel_id ?? '') }}"
+                                        placeholder="e.g. CXXXXXXXXXXXXXXXXX"
+                                    >
+                                    <small class="small-help">TikTok Ads Manager &gt; Assets &gt; Events &gt; Web Events - copy your Pixel ID.</small>
+                                    @error('tiktok_pixel_id')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="tiktok_access_token">Events API Access Token</label>
+                                    <textarea
+                                        class="form-control @error('tiktok_access_token') is-invalid @enderror"
+                                        id="tiktok_access_token"
+                                        name="tiktok_access_token"
+                                        rows="3"
+                                        placeholder="Paste TikTok Events API access token here"
+                                    >{{ old('tiktok_access_token', $setting->tiktok_access_token ?? '') }}</textarea>
+                                    <small class="small-help">TikTok Events Manager &gt; Settings &gt; Events API &gt; Generate Access Token.</small>
+                                    @error('tiktok_access_token')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-3">
+                                    <label class="form-label" for="tiktok_test_event_code">Test Event Code (optional)</label>
+                                    <input
+                                        type="text"
+                                        class="form-control @error('tiktok_test_event_code') is-invalid @enderror"
+                                        id="tiktok_test_event_code"
+                                        name="tiktok_test_event_code"
+                                        value="{{ old('tiktok_test_event_code', $setting->tiktok_test_event_code ?? '') }}"
+                                        placeholder="e.g. TEST12345"
+                                    >
+                                    <small class="small-help">Use only while testing in TikTok Events Manager. Remove it before live ads.</small>
+                                    @error('tiktok_test_event_code')
+                                        <div class="invalid-feedback">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="mb-0 form-check form-switch">
+                                    <input
+                                        class="form-check-input"
+                                        type="checkbox"
+                                        id="tiktok_status"
+                                        name="tiktok_status"
+                                        value="1"
+                                        {{ old('tiktok_status', $setting->tiktok_status ?? 0) ? 'checked' : '' }}
+                                    >
+                                    <label class="form-check-label" for="tiktok_status">
+                                        TikTok Pixel & Events API Active
+                                    </label>
+                                </div>
+                            </div>
                         </div>
 
                         <div class="text-end">

@@ -180,6 +180,16 @@ class FacebookCapiService
         // Lazy initialize credentials
         $this->initialize();
 
+        if ($eventName === 'Purchase') {
+            try {
+                app(TikTokEventsApiService::class)->sendPurchaseFromPayload($data, $userData, $options);
+            } catch (\Throwable $e) {
+                Log::warning('TikTok Events API mirror failed for Purchase event', [
+                    'error' => $e->getMessage(),
+                ]);
+            }
+        }
+
         if (!$this->accessToken || !$this->pixelId) {
             Log::warning('Facebook CAPI: Missing access token or pixel ID');
             return false;

@@ -1361,7 +1361,7 @@ class OrderController extends Controller
         $topStatusCards = collect([
             ['slug' => 'all', 'label' => 'Total Orders', 'icon' => 'fe-shopping-bag', 'tone' => 'primary', 'count' => $allOrdersCount],
             ['slug' => 'pending', 'label' => 'Pending', 'icon' => 'fe-clock', 'tone' => 'warning'],
-            ['slug' => 'processing', 'label' => 'Processing', 'icon' => 'fe-package', 'tone' => 'info'],
+            ['slug' => 'processing', 'label' => 'Approved', 'icon' => 'fe-package', 'tone' => 'info'],
             ['slug' => 'in-courier', 'label' => 'In Courier', 'icon' => 'fe-truck', 'tone' => 'accent'],
             ['slug' => 'delivered', 'label' => 'Delivered', 'icon' => 'fe-check-circle', 'tone' => 'success'],
             ['slug' => 'returned', 'label' => 'Returned', 'icon' => 'fe-corner-up-left', 'tone' => 'danger'],
@@ -3595,11 +3595,11 @@ class OrderController extends Controller
         $shippingcharge = ShippingCharge::where('status', 1)->get();
         $quickOrderStatuses = OrderStatus::query()
             ->whereIn('slug', ['new', 'pending', 'processing'])
-            ->orWhereIn('name', ['New', 'Pending', 'Processing'])
+            ->orWhereIn('name', ['New', 'Pending', 'Processing', 'Approved'])
             ->orderByRaw("CASE
                 WHEN LOWER(slug) = 'new' OR LOWER(name) = 'new' THEN 1
                 WHEN LOWER(slug) = 'pending' OR LOWER(name) = 'pending' THEN 2
-                WHEN LOWER(slug) = 'processing' OR LOWER(name) = 'processing' THEN 3
+                WHEN LOWER(slug) = 'processing' OR LOWER(name) IN ('processing', 'approved') THEN 3
                 ELSE 4 END")
             ->get();
 
@@ -3664,6 +3664,9 @@ class OrderController extends Controller
         $order->order_status    = (int) ($request->order_status ?: (OrderStatus::where('slug', 'new')->value('id') ?: 1));
         if (Schema::hasColumn('orders', 'created_by')) {
             $order->created_by = Auth::guard('admin')->id() ?: auth()->id();
+        }
+        if (Schema::hasColumn('orders', 'order_source_channel')) {
+            $order->order_source_channel = 'created';
         }
         $order->note            = $orderNote;
         $order->save();
@@ -4309,11 +4312,11 @@ class OrderController extends Controller
         $cartinfo = Cart::instance('pos_shopping')->content();
         $quickOrderStatuses = OrderStatus::query()
             ->whereIn('slug', ['new', 'pending', 'processing'])
-            ->orWhereIn('name', ['New', 'Pending', 'Processing'])
+            ->orWhereIn('name', ['New', 'Pending', 'Processing', 'Approved'])
             ->orderByRaw("CASE
                 WHEN LOWER(slug) = 'new' OR LOWER(name) = 'new' THEN 1
                 WHEN LOWER(slug) = 'pending' OR LOWER(name) = 'pending' THEN 2
-                WHEN LOWER(slug) = 'processing' OR LOWER(name) = 'processing' THEN 3
+                WHEN LOWER(slug) = 'processing' OR LOWER(name) IN ('processing', 'approved') THEN 3
                 ELSE 4 END")
             ->get();
 
@@ -4388,6 +4391,9 @@ class OrderController extends Controller
         $order->customer_id     = $customer->id;
         $order->order_status    = $selectedOrderStatus;
         $order->note            = $orderSource !== '' ? $orderSource : null;
+        if (Schema::hasColumn('orders', 'order_source_channel') && $order->created_by) {
+            $order->order_source_channel = 'created';
+        }
         if (Schema::hasColumn('orders', 'order_note')) {
             $order->order_note = $courierNote !== '' ? $courierNote : null;
         }

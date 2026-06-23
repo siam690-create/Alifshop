@@ -37,6 +37,13 @@
                     return null;
                 }
             });
+            $tiktokPixelId = \Illuminate\Support\Facades\Cache::remember('tiktok_browser_pixel_id', 3600, function () {
+                try {
+                    return optional(\App\Models\FacebookCapiSetting::where('tiktok_status', 1)->first())->tiktok_pixel_id;
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            });
         @endphp
         <meta name="facebook-domain-verification" content="{{ $facebookDomainToken ?: '38f1w8335btoklo88dyfl63ba3st2e' }}" />
         <style>
@@ -440,6 +447,27 @@
         </noscript>
         <!-- End Facebook Pixel Code -->
         @endforeach
+
+        @if(!empty($tiktokPixelId))
+        <!-- TikTok Pixel Code -->
+        <script>
+            !function (w, d, t) {
+                w.TiktokAnalyticsObject=t;var ttq=w[t]=w[t]||[];
+                ttq.methods=["page","track","identify","instances","debug","on","off","once","ready","alias","group","enableCookie","disableCookie","holdConsent","revokeConsent","grantConsent"];
+                ttq.setAndDefer=function(t,e){t[e]=function(){t.push([e].concat(Array.prototype.slice.call(arguments,0)))}};
+                for(var i=0;i<ttq.methods.length;i++)ttq.setAndDefer(ttq,ttq.methods[i]);
+                ttq.instance=function(t){for(var e=ttq._i[t]||[],n=0;n<ttq.methods.length;n++)ttq.setAndDefer(e,ttq.methods[n]);return e};
+                ttq.load=function(e,n){var r="https://analytics.tiktok.com/i18n/pixel/events.js",o=n&&n.partner;
+                    ttq._i=ttq._i||{},ttq._i[e]=[],ttq._i[e]._u=r,ttq._t=ttq._t||{},ttq._t[e]=+new Date,ttq._o=ttq._o||{},ttq._o[e]=n||{};
+                    n=document.createElement("script");n.type="text/javascript",n.async=!0,n.src=r+"?sdkid="+e+"&lib="+t;
+                    e=document.getElementsByTagName("script")[0];e.parentNode.insertBefore(n,e)
+                };
+                ttq.load(@json($tiktokPixelId));
+                ttq.page();
+            }(window, document, 'ttq');
+        </script>
+        <!-- End TikTok Pixel Code -->
+        @endif
         
         @foreach($gtm_code as $gtm)
         @php
@@ -456,7 +484,7 @@
         <!-- End Google Tag Manager -->
         @endforeach
     </head>
-    <body class="gotop">
+    <body class="gotop @yield('body_class')">
         @foreach($gtm_code as $gtm)
         @php
             $gtmContainerId = strtoupper(trim((string) $gtm->code));
@@ -526,6 +554,9 @@
                         <a href="{{route('home')}}"><img src="{{asset($generalsetting->dark_logo)}}" alt="" /></a>
                     </div>
 <div class="menu-bag">
+    <button type="button" class="mobile-product-search-toggle" aria-label="Open product search" style="display: none;">
+        <i class="fa-solid fa-magnifying-glass"></i>
+    </button>
     <a href="{{ route('customer.checkout') }}" class="margin-shopping">
         <i class="fa-solid fa-cart-shopping"></i>
         <span class="mobilecart-qty">{{ Cart::instance('shopping')->count() }}</span>

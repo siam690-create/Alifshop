@@ -1,5 +1,6 @@
 @extends('frontEnd.layouts.master')
 @section('title', $details->name) 
+@section('body_class', 'product-details-page')
 @push('seo')
 @php
     $metaTitle = $details->meta_title ?? $details->name;
@@ -35,6 +36,111 @@
 @push('css')
 <link rel="stylesheet" href="{{ asset('public/frontEnd/css/zoomsl.css') }}">
 <style>
+.mobile-product-search-toggle {
+    display: none;
+}
+
+@media (max-width: 767px) {
+    .mobile-search,
+    .product-details-page .mobile-search {
+        display: none !important;
+        height: 0;
+        line-height: 0;
+        margin: 0 !important;
+        min-height: 0 !important;
+        overflow: hidden;
+        padding: 0 !important;
+    }
+
+    .product-mobile-search-open .mobile-search,
+    .product-details-page.product-mobile-search-open .mobile-search {
+        display: block !important;
+        height: auto;
+        line-height: normal;
+        min-height: 0 !important;
+        overflow: visible;
+        padding: 10px 16px 12px !important;
+    }
+
+    .product-details-page .homeproduct.main-details-page {
+        margin-top: 0 !important;
+    }
+
+    .product-details-page .product-section {
+        margin-top: 0 !important;
+        padding-top: 0 !important;
+    }
+
+    .product-details-page .product-section > .container,
+    .product-details-page .product-section > .container > .row {
+        padding-top: 0 !important;
+        margin-top: 0 !important;
+    }
+
+    .product-details-page .details_slider {
+        margin-top: 0 !important;
+    }
+
+    .product-details-page .pro_brand,
+    .product-details-page .pro_unig {
+        display: none !important;
+    }
+
+    .product-details-page .single_product {
+        display: flex !important;
+        flex-direction: column;
+        gap: 10px !important;
+        margin-left: 0 !important;
+        width: 100%;
+    }
+
+    .product-details-page .single_product .add_cart_btn,
+    .product-details-page .single_product .order_now_btn {
+        display: block;
+        flex: none !important;
+        margin: 0 !important;
+        width: 100% !important;
+    }
+
+    .product-details-page .call_now_btn[href*="api.whatsapp.com"] {
+        display: none !important;
+    }
+
+    .product-details-page .details_slider .dimage_item {
+        aspect-ratio: 1 / 1;
+        align-items: center;
+        display: flex;
+        justify-content: center;
+        overflow: hidden;
+        width: 100%;
+    }
+
+    .product-details-page .details_slider .dimage_item img,
+    .product-details-page .dimage_item img.block__pic {
+        height: 100% !important;
+        object-fit: cover;
+        width: 100% !important;
+    }
+
+    .product-details-page .mobile-product-search-toggle {
+        align-items: center;
+        background: #fff;
+        border: 0;
+        color: #111;
+        display: inline-flex;
+        font-size: 20px;
+        height: 36px;
+        justify-content: center;
+        margin-right: 12px;
+        padding: 0;
+        width: 36px;
+    }
+
+    .product-details-page.product-mobile-search-open .mobile-product-search-toggle {
+        color: var(--theme-color, #d70018);
+    }
+}
+
 /* ✅ Scoped Review Section */
 .gomobd-review-section {
     font-family: 'Poppins', sans-serif;
@@ -759,6 +865,30 @@
 
 <script src="{{ asset('public/frontEnd/js/zoomsl.min.js') }}"></script>
 <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const searchToggle = document.querySelector('.mobile-product-search-toggle');
+        const mobileSearch = document.querySelector('.mobile-search');
+
+        if (!searchToggle || !mobileSearch) {
+            return;
+        }
+
+        searchToggle.style.display = '';
+
+        searchToggle.addEventListener('click', function () {
+            document.body.classList.toggle('product-mobile-search-open');
+
+            if (document.body.classList.contains('product-mobile-search-open')) {
+                setTimeout(function () {
+                    const searchInput = mobileSearch.querySelector('input[name="keyword"]');
+                    if (searchInput) {
+                        searchInput.focus();
+                    }
+                }, 80);
+            }
+        });
+    });
+
     const variants = @json($details->variantPrices);
 
     @if($details->is_wholesale && $details->wholesalePrices && $details->wholesalePrices->count() > 0)

@@ -34,6 +34,7 @@ use DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Hash as HashFacade;
 use Illuminate\Support\Facades\File;
+use Illuminate\Support\Facades\Schema;
 use App\Helpers\OrderHelper;
 use App\Services\FacebookCapiService;
 
@@ -922,6 +923,9 @@ public function order_save(Request $request)
         $order->coupon_code     = Session::get('coupon_code') ?? null;
         $order->discount        = $discount ?? 0;
         $order->ip_address      = $request->ip();
+        if (Schema::hasColumn('orders', 'order_source_channel')) {
+            $order->order_source_channel = session('order_source_channel', 'direct') ?: 'direct';
+        }
         
         $order->save();
 

@@ -507,7 +507,7 @@
                             <select name="order_status" class="form-control">
                                 @foreach($quickOrderStatuses ?? [] as $status)
                                     <option value="{{ $status->id }}" {{ strtolower($status->slug ?? $status->name) === 'new' ? 'selected' : '' }}>
-                                        {{ $status->name }}
+                                        {{ strtolower((string) ($status->slug ?? '')) === 'processing' || strtolower((string) ($status->name ?? '')) === 'processing' ? 'Approved' : $status->name }}
                                     </option>
                                 @endforeach
                             </select>

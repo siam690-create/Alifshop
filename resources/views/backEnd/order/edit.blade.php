@@ -244,7 +244,7 @@
                             <select id="order_status" name="order_status" class="form-control">
                                 @foreach($quickOrderStatuses ?? [] as $status)
                                     <option value="{{ $status->id }}" {{ (int) $order->order_status === (int) $status->id ? 'selected' : '' }}>
-                                        {{ $status->name }}
+                                        {{ strtolower((string) ($status->slug ?? '')) === 'processing' || strtolower((string) ($status->name ?? '')) === 'processing' ? 'Approved' : $status->name }}
                                     </option>
                                 @endforeach
                             </select>

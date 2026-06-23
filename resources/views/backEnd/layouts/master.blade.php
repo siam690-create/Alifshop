@@ -448,7 +448,12 @@
       @foreach($orderstatus as $value)
         <li>
           <a href="{{ route('admin.orders', ['slug'=>$value->slug]) }}">
-            <i data-feather="file-plus"></i>{{ $value->name }}
+            @php
+              $orderStatusLabel = strtolower((string) ($value->slug ?? '')) === 'processing' || strtolower((string) ($value->name ?? '')) === 'processing'
+                ? 'Approved'
+                : $value->name;
+            @endphp
+            <i data-feather="file-plus"></i>{{ $orderStatusLabel }}
             <span class="badge bg-secondary rounded-pill float-end">{{ $orderStatusCounts[$value->id] ?? 0 }}</span>
           </a>
         </li>
@@ -949,7 +954,7 @@
       <li><a href="{{ route('paymentgeteway.manage') }}"><i data-feather="file-plus"></i> Payment Gateway</a></li>
       <li><a href="{{ route('smsgeteway.manage') }}"><i data-feather="file-plus"></i> SMS Gateway</a></li>
       <li><a href="{{ route('courierapi.manage') }}"><i data-feather="file-plus"></i> Courier API</a></li>
-      <li><a href="{{ route('admin.facebook_capi.edit') }}"><i data-feather="facebook"></i> Facebook CAPI</a></li>
+      <li><a href="{{ route('admin.facebook_capi.edit') }}"><i data-feather="facebook"></i> FB/TikTok CAPI</a></li>
     </ul>
   </div>
 </li>

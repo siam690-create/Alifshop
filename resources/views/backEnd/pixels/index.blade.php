@@ -82,8 +82,8 @@
             <div>
                 <h4 class="page-title mb-0" style="font-weight: 700; color: #2d3436;">Tracking Pixels</h4>
                 <p class="text-muted font-size-13 mb-0">
-                    Manage browser pixels. Server-side Facebook CAPI settings are managed from
-                    <a href="{{ route('admin.facebook_capi.edit') }}">Facebook CAPI</a>.
+                    Manage browser pixels. Server-side tracking settings are managed from
+                    <a href="{{ route('admin.facebook_capi.edit') }}">FB/TikTok CAPI</a>.
                 </p>
             </div>
             <a href="{{route('pixels.create')}}" class="btn btn-primary rounded-pill shadow-sm px-4">

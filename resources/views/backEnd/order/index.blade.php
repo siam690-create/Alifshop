@@ -1,5 +1,5 @@
 @extends('backEnd.layouts.master')
-@section('title',$order_status->name.' Order')
+@section('title',(strtolower((string) ($order_status->slug ?? '')) === 'processing' || strtolower((string) ($order_status->name ?? '')) === 'processing' ? 'Approved' : $order_status->name).' Order')
 @section('css')
 <style>
     .orders-page-shell {
@@ -558,6 +558,12 @@
         font-size: 12px;
         font-weight: 600;
     }
+    .order-source-detail {
+        margin-top: 3px;
+        color: #64748b;
+        font-size: 11px;
+        font-weight: 600;
+    }
     .order-customer-name {
         font-size: 15px;
         font-weight: 700;
@@ -966,7 +972,7 @@
         ['slug' => 'all', 'label' => 'All', 'match' => ['all']],
         ['slug' => 'new', 'label' => 'New', 'match' => ['new']],
         ['slug' => 'pending', 'label' => 'Pending', 'match' => ['pending']],
-        ['slug' => 'processing', 'label' => 'Processing', 'match' => ['processing']],
+        ['slug' => 'processing', 'label' => 'Approved', 'match' => ['processing', 'approved']],
         ['slug' => 'wfp', 'label' => 'WFP', 'match' => ['wfp']],
         ['slug' => 'on-the-way', 'label' => 'On The Way', 'match' => ['on-the-way', 'on_the_way', 'on the way']],
         ['slug' => 'in-courier', 'label' => 'In Courier', 'match' => ['in-courier', 'in_courier', 'in courier']],
@@ -1240,7 +1246,7 @@
                                     $pendingStatusId = optional($orderstatus->first(function($s){ return in_array(strtolower($s->slug ?? ''), ['pending']) || strtolower($s->name ?? '') === 'pending'; }))->id;
                                     $cancelStatusId = optional($orderstatus->first(function($s){ return in_array(strtolower($s->slug ?? ''), ['cancelled', 'cancel']) || in_array(strtolower($s->name ?? ''), ['cancelled', 'cancel']); }))->id;
                                     $quickPrimaryStatusId = $isPendingPage ? $processingStatusId : $approvedStatusId;
-                                    $quickPrimaryStatusLabel = $isPendingPage ? 'Processing' : 'Approved';
+                                    $quickPrimaryStatusLabel = 'Approved';
                                 @endphp
                                 @foreach($show_data as $value)
                                     @php
@@ -1269,7 +1275,11 @@
                                         $productPrice = max(0, $total - $deliveryCharge);
                                         $codAmount = $productPrice + $deliveryCharge;
                                         $due = max(0, $total - $paid);
+                                        $statusSlug = strtolower((string) optional($value->status)->slug);
                                         $statusName = $value->status ? $value->status->name : 'Unknown';
+                                        if ($statusSlug === 'processing' || strtolower((string) $statusName) === 'processing') {
+                                            $statusName = 'Approved';
+                                        }
                                         $trackingId = isset($value->courier_tracking_id) ? $value->courier_tracking_id : $value->consignment_id;
                                         $courierType = $value->courier_type;
                                         if (!$courierType && $value->consignment_id) {
@@ -1285,10 +1295,36 @@
                                                 } else {
                                                     $createdByLabel = 'Customer';
                                                 }
-                                                if ($orderSource === '-' && !$value->createdByAdmin && !$isResellerOrder) {
-                                                    $orderSource = 'Website';
+                                                $orderSourcePrimary = 'Website';
+                                                $orderSourceDetail = 'Direct';
+                                                if ($value->createdByAdmin) {
+                                                    $createdByName = trim((string) $value->createdByAdmin->name);
+                                                    $orderSourcePrimary = 'Created';
+                                                    $orderSourceDetail = $createdByName !== '' ? $createdByName : 'Admin';
+                                                } elseif ($isResellerOrder) {
+                                                    $orderSourcePrimary = 'Reseller';
+                                                    $orderSourceDetail = $resellerName ?: 'Reseller';
+                                                } else {
+                                                    $sourceChannel = strtolower(trim((string) ($value->order_source_channel ?? '')));
+                                                    $legacySource = strtolower(trim((string) $orderSource));
+                                                    if ($sourceChannel === '' || in_array($sourceChannel, ['-', 'website'], true)) {
+                                                        if (in_array($legacySource, ['fb', 'facebook', 'messenger'], true)) {
+                                                            $sourceChannel = 'facebook';
+                                                        } elseif (in_array($legacySource, ['tiktok', 'tik tok'], true)) {
+                                                            $sourceChannel = 'tiktok';
+                                                        } else {
+                                                            $sourceChannel = 'direct';
+                                                        }
+                                                    }
+                                                    $orderSourceDetail = match ($sourceChannel) {
+                                                        'facebook', 'fb', 'messenger' => 'Facebook',
+                                                        'tiktok', 'tik tok' => 'TikTok',
+                                                        'created' => 'Created',
+                                                        'direct' => 'Direct',
+                                                        default => \Illuminate\Support\Str::headline($sourceChannel),
+                                                    };
                                                 }
-                                                $lifetimeBadge = ($orderSource === 'Website' && $customerPhone !== '-')
+                                                $lifetimeBadge = ($orderSourcePrimary === 'Website' && $customerPhone !== '-')
                                                     ? ($customerLifetimeBadges[$customerPhone] ?? null)
                                                     : null;
                                         $adminNoteText = trim((string) ($value->admin_note ?? ''));
@@ -1315,7 +1351,8 @@
                                             <div class="order-invoice-id">{{ $value->invoice_id }}</div>
                                             <div class="order-meta-text mt-1">{{ date('d-m-Y', strtotime($value->updated_at)) }}</div>
                                             <div class="order-meta-text">{{ date('h:i:s a', strtotime($value->updated_at)) }}</div>
-                                            <span class="order-source-badge">{{ $orderSource }}</span>
+                                            <span class="order-source-badge">{{ $orderSourcePrimary }}</span>
+                                            <div class="order-source-detail">{{ $orderSourceDetail }}</div>
                                         </td>
                                         <td>
                                             <div class="order-customer-name">{{ $customerName }}</div>
@@ -1435,7 +1472,7 @@
                                                         <button type="button" class="order-menu-item order-menu-approved single-status-change" data-order-id="{{ $value->id }}" data-status-id="{{ $quickPrimaryStatusId }}">{{ $quickPrimaryStatusLabel }}</button>
                                                     @endif
                                                     @if($processingStatusId && $isNewPage)
-                                                        <button type="button" class="order-menu-item order-menu-processing single-status-change" data-order-id="{{ $value->id }}" data-status-id="{{ $processingStatusId }}">Processing</button>
+                                                        <button type="button" class="order-menu-item order-menu-processing single-status-change" data-order-id="{{ $value->id }}" data-status-id="{{ $processingStatusId }}">Approved</button>
                                                     @endif
                                                     @if($pendingStatusId && !$isPendingPage)
                                                         <button type="button" class="order-menu-item order-menu-pending single-status-change" data-order-id="{{ $value->id }}" data-status-id="{{ $pendingStatusId }}">Pending</button>
@@ -1502,7 +1539,7 @@
                     <option value="">Select Status..</option>
                     @if(isset($orderstatus) && $orderstatus->count() > 0)
                         @foreach($orderstatus as $s)
-                            <option value="{{ $s->id }}">{{ $s->name }}</option>
+                            <option value="{{ $s->id }}">{{ strtolower((string) ($s->slug ?? '')) === 'processing' || strtolower((string) ($s->name ?? '')) === 'processing' ? 'Approved' : $s->name }}</option>
                         @endforeach
                     @else
                         <option value="">No status available</option>
