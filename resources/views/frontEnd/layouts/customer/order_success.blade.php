@@ -274,6 +274,35 @@
 
 @push('script')
 @php
+    $shipping = $order->shipping;
+    $customer = $order->customer;
+    $customerName = trim((string) ($shipping->name ?? $customer->name ?? ''));
+    $customerNameParts = preg_split('/\s+/', $customerName, 2) ?: [];
+    $customerPhone = preg_replace('/\D+/', '', (string) ($shipping->phone ?? $customer->phone ?? ''));
+    $customerEmail = trim(strtolower((string) ($shipping->email ?? $customer->email ?? '')));
+    $customerCity = trim((string) ($shipping->city ?? $shipping->district ?? $shipping->area ?? ''));
+    $externalId = (string) ($order->customer_id ?? $order->id);
+
+    $purchaseUserData = array_filter([
+        'email' => $customerEmail ?: null,
+        'phone' => $customerPhone ?: null,
+        'country' => 'BD',
+        'first_name' => $customerNameParts[0] ?? null,
+        'last_name' => $customerNameParts[1] ?? null,
+        'city' => $customerCity ?: null,
+        'external_id' => $externalId,
+    ], function ($value) {
+        return $value !== null && $value !== '';
+    });
+
+    $tiktokUserData = array_filter([
+        'email' => $customerEmail ?: null,
+        'phone_number' => $customerPhone ?: null,
+        'external_id' => $externalId,
+    ], function ($value) {
+        return $value !== null && $value !== '';
+    });
+
     $purchaseItems = $order->orderdetails->map(function ($item, $index) {
         return [
             'item_id' => (string) ($item->product_id ?? $item->id),
@@ -281,6 +310,15 @@
             'index' => $index,
             'price' => (float) $item->sale_price,
             'quantity' => (int) $item->qty,
+        ];
+    })->values();
+
+    $tiktokContents = $purchaseItems->map(function ($item) {
+        return [
+            'content_id' => $item['item_id'],
+            'content_name' => $item['item_name'],
+            'quantity' => $item['quantity'],
+            'price' => $item['price'],
         ];
     })->values();
 @endphp
@@ -291,6 +329,7 @@ window.dataLayer.push({ ecommerce: null });
 window.dataLayer.push({
     event: "purchase",
     event_id: @json('purchase_' . $order->id),
+    user_data: @json($purchaseUserData),
     ecommerce: {
         transaction_id: @json((string) ($order->invoice_id ?? $order->id)),
         event_id: @json('purchase_' . $order->id),
@@ -304,16 +343,14 @@ window.dataLayer.push({
 });
 
 if (window.ttq) {
+    const tiktokUserData = @json($tiktokUserData);
+    if (Object.keys(tiktokUserData).length) {
+        window.ttq.identify(tiktokUserData);
+    }
+
     window.ttq.track('CompletePayment', {
         content_type: 'product',
-        contents: @json($purchaseItems->map(function ($item) {
-            return [
-                'content_id' => $item['item_id'],
-                'content_name' => $item['item_name'],
-                'quantity' => $item['quantity'],
-                'price' => $item['price'],
-            ];
-        })->values()),
+        contents: @json($tiktokContents),
         currency: 'BDT',
         value: {{ (float) $grand_total }}
     }, {
