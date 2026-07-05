@@ -139,6 +139,11 @@
                 <i class="fas fa-university"></i> পেমেন্ট উইথড্র
             </a>
         </div>
+        <div class="nav-item">
+            <a href="{{ route('reseller.invoices.index') }}" class="nav-link {{ request()->routeIs('reseller.invoices.*') ? 'active' : '' }}">
+                <i class="fas fa-file-invoice-dollar"></i> Invoice
+            </a>
+        </div>
 
         <div class="menu-label">Tools</div>
         <div class="nav-item">

@@ -473,6 +473,7 @@ class RedXService
         $inCourierStatusId = $resolveStatusId(['in-courier', 'in_courier', 'in courier'], 5);
         $deliveredStatusId = $resolveStatusId(['delivered', 'completed', 'complete'], 6);
         $returnedStatusId = $resolveStatusId(['returned', 'return', 'return_to_merchant'], 11);
+        $paidReturnStatusId = $resolveStatusId(['paid-return', 'paid_return', 'paid return']);
         $partialDeliveredStatusId = $resolveStatusId(['partial-delivered', 'partial_delivered', 'partial delivered']);
 
         $statusMap = [
@@ -484,6 +485,9 @@ class RedXService
             'agent-hold' => $inCourierStatusId,
             'agent-returning' => $returnedStatusId,
             'returned' => $returnedStatusId,
+            'paid-return' => $paidReturnStatusId,
+            'return-paid' => $paidReturnStatusId,
+            'paid-returned' => $paidReturnStatusId,
             'agent-area-change' => $inCourierStatusId,
         ];
 

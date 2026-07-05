@@ -25,6 +25,7 @@ class User extends Authenticatable
         'shop_name',
         'role',
         'wallet_balance',
+        'reseller_payout_cycle',
         'verification_status',
         'voter_id_front',
         'voter_id_back',

@@ -222,6 +222,11 @@ class SteadfastWebhookController extends Controller
                 'fallback' => 11,
             ],
             [
+                'match' => ['paid return', 'paid returned', 'return paid', 'returned paid', 'paid return transit'],
+                'target' => ['paid-return', 'paid_return', 'paid return'],
+                'fallback' => null,
+            ],
+            [
                 'match' => ['returned', 'return', 'return to merchant', 'delivery return', 'delivery returned'],
                 'target' => ['returned', 'return', 'return_to_merchant'],
                 'fallback' => null,
@@ -286,6 +291,7 @@ class SteadfastWebhookController extends Controller
 
         $cancelLikeStatuses = array_values(array_unique(array_filter([
             $this->resolveStatusId(['cancelled', 'canceled', 'cancel'], 11),
+            $this->resolveStatusId(['paid-return', 'paid_return', 'paid return']),
             $this->resolveStatusId(['returned', 'return', 'return_to_merchant']),
         ])));
 

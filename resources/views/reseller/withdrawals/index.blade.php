@@ -156,9 +156,14 @@
                         </div>
                     @endif
 
+                    <div class="alert alert-info border-0 rounded-3 d-flex align-items-center justify-content-between mb-4">
+                        <span><i class="fas fa-file-invoice-dollar me-2"></i> Manual withdraw is disabled. Completed reseller orders will be grouped into payout invoices.</span>
+                        <a href="{{ route('reseller.invoices.index') }}" class="btn btn-sm btn-primary">View Invoice</a>
+                    </div>
+
                     <form action="{{ route('reseller.withdrawals.store') }}" method="POST">
                         @csrf
-                        <fieldset {{ !$canWithdraw ? 'disabled' : '' }}>
+                        <fieldset disabled>
                         
                         <div class="row g-3">
                             <div class="col-md-6">

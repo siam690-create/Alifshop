@@ -22,6 +22,10 @@ class Kernel extends ConsoleKernel
             ->everyTenMinutes()
             ->withoutOverlapping()
             ->runInBackground();
+
+        $schedule->command('reseller-invoices:generate')
+            ->dailyAt('00:10')
+            ->withoutOverlapping();
     }
 
     /**

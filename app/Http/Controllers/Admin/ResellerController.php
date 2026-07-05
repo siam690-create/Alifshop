@@ -61,6 +61,7 @@ class ResellerController extends Controller
             'email' => 'required|email|unique:users,email,' . $request->hidden_id,
             'shop_name' => 'nullable|string|max:255',
             'status' => 'required|in:0,1',
+            'reseller_payout_cycle' => 'required|in:daily,weekly,monthly',
             'password' => 'nullable|min:6|confirmed',
         ]);
 

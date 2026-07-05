@@ -271,6 +271,9 @@ Route::prefix('reseller')
         Route::get('/wallet', [ResellerDashboardController::class, 'wallet'])->name('wallet');
         Route::get('/withdrawals', [\App\Http\Controllers\Reseller\WithdrawalController::class, 'index'])->name('withdrawals.index');
         Route::post('/withdrawals', [\App\Http\Controllers\Reseller\WithdrawalController::class, 'store'])->name('withdrawals.store');
+        Route::get('/invoices', [\App\Http\Controllers\Reseller\InvoiceController::class, 'index'])->name('invoices.index');
+        Route::get('/invoices/{invoice}/csv', [\App\Http\Controllers\Reseller\InvoiceController::class, 'csv'])->name('invoices.csv');
+        Route::get('/invoices/{invoice}', [\App\Http\Controllers\Reseller\InvoiceController::class, 'show'])->name('invoices.show');
         Route::get('/verification', [\App\Http\Controllers\Reseller\VerificationController::class, 'index'])->name('verification.index');
         Route::post('/verification', [\App\Http\Controllers\Reseller\VerificationController::class, 'store'])->name('verification.store');
         Route::get('/settings', [\App\Http\Controllers\Reseller\SettingsController::class, 'index'])->name('settings');
@@ -1090,6 +1093,11 @@ Route::get('dashboard', [DashboardController::class, 'dashboard'])->name('admin.
     Route::get('reseller-withdrawals', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class,'index'])->name('admin.reseller.withdrawals.index');
     Route::post('reseller-withdrawals/{id}/approve', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class,'approve'])->name('admin.reseller.withdrawals.approve');
     Route::post('reseller-withdrawals/{id}/reject', [\App\Http\Controllers\Admin\ResellerWithdrawalController::class,'reject'])->name('admin.reseller.withdrawals.reject');
+    Route::get('reseller-invoices', [\App\Http\Controllers\Admin\ResellerInvoiceController::class,'index'])->name('admin.reseller.invoices.index');
+    Route::post('reseller-invoices/generate', [\App\Http\Controllers\Admin\ResellerInvoiceController::class,'generate'])->name('admin.reseller.invoices.generate');
+    Route::get('reseller-invoices/{invoice}/csv', [\App\Http\Controllers\Admin\ResellerInvoiceController::class,'csv'])->name('admin.reseller.invoices.csv');
+    Route::get('reseller-invoices/{invoice}', [\App\Http\Controllers\Admin\ResellerInvoiceController::class,'show'])->name('admin.reseller.invoices.show');
+    Route::post('reseller-invoices/{invoice}/paid', [\App\Http\Controllers\Admin\ResellerInvoiceController::class,'markPaid'])->name('admin.reseller.invoices.paid');
 
     // Refund Management Routes
     Route::get('refunds', [\App\Http\Controllers\Admin\RefundController::class, 'index'])->name('admin.refunds.index');

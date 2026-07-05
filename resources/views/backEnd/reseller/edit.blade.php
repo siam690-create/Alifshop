@@ -146,6 +146,25 @@
                     </div>
                 </div>
 
+                {{-- Invoice Settings --}}
+                <div class="card card-modern">
+                    <div class="card-header-modern">
+                        <h5 class="section-title"><i data-feather="file-text" class="text-primary" style="width: 18px;"></i> Invoice Settings</h5>
+                    </div>
+                    <div class="card-body p-4">
+                        <label class="form-label-custom">Invoice Payout Cycle</label>
+                        <select class="form-select form-select-custom @error('reseller_payout_cycle') is-invalid @enderror" name="reseller_payout_cycle" required>
+                            @foreach(['daily' => 'Daily', 'weekly' => 'Weekly', 'monthly' => 'Monthly'] as $cycleValue => $cycleLabel)
+                                <option value="{{ $cycleValue }}" {{ old('reseller_payout_cycle', $reseller->reseller_payout_cycle ?? 'daily') === $cycleValue ? 'selected' : '' }}>
+                                    {{ $cycleLabel }}
+                                </option>
+                            @endforeach
+                        </select>
+                        <small class="text-muted d-block mt-2">Completed reseller orders will be grouped into invoices by this cycle.</small>
+                        @error('reseller_payout_cycle') <span class="invalid-feedback">{{ $message }}</span> @enderror
+                    </div>
+                </div>
+
                 {{-- Security --}}
                 <div class="card card-modern">
                     <div class="card-header-modern">

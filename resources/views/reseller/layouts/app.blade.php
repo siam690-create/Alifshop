@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    @php($user = $user ?? auth('admin')->user())
     <title>@yield('title', 'প্রো রিসেলার ড্যাশবোর্ড') - {{ $user->shop_name ?? $user->name }}</title>
     
     <!-- App favicon -->

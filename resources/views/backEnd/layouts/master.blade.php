@@ -799,6 +799,7 @@
 @php
   $pendingResellerVerificationCount = \App\Models\User::where('role', 'reseller')->where('verification_status', 'pending')->count();
   $pendingResellerWithdrawalCount = \App\Models\ResellerWithdrawal::where('status', 'pending')->count();
+  $pendingResellerInvoiceCount = \App\Models\ResellerInvoice::where('status', 'pending')->count();
 @endphp
 <li>
   <a href="#sidebar-resellers" data-bs-toggle="collapse">
@@ -806,7 +807,7 @@
     <span> Resellers </span>
     <span class="menu-arrow"></span>
   </a>
-  <div class="collapse {{ request()->routeIs('admin.resellers.*') || request()->routeIs('admin.reseller.verification.*') || request()->routeIs('admin.reseller.withdrawals.*') ? 'show' : '' }}" id="sidebar-resellers">
+  <div class="collapse {{ request()->routeIs('admin.resellers.*') || request()->routeIs('admin.reseller.verification.*') || request()->routeIs('admin.reseller.withdrawals.*') || request()->routeIs('admin.reseller.invoices.*') ? 'show' : '' }}" id="sidebar-resellers">
     <ul class="nav-second-level">
       @can('reseller-list')
       <li><a href="{{ route('admin.resellers.index') }}"><i data-feather="file-plus"></i> All Resellers</a></li>
@@ -827,6 +828,14 @@
           <i data-feather="dollar-sign"></i> Reseller Withdrawals
           @if($pendingResellerWithdrawalCount > 0)
             <span class="badge bg-warning rounded-pill float-end">{{ $pendingResellerWithdrawalCount }}</span>
+          @endif
+        </a>
+      </li>
+      <li>
+        <a href="{{ route('admin.reseller.invoices.index') }}">
+          <i data-feather="file-text"></i> Reseller Invoices
+          @if($pendingResellerInvoiceCount > 0)
+            <span class="badge bg-info rounded-pill float-end">{{ $pendingResellerInvoiceCount }}</span>
           @endif
         </a>
       </li>

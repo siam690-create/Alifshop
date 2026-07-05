@@ -979,6 +979,7 @@
         ['slug' => 'delivered', 'label' => 'Delivered', 'match' => ['delivered']],
         ['slug' => 'partial-delivered', 'label' => 'Partial', 'match' => ['partial-delivered', 'partial_delivered', 'partial delivered']],
         ['slug' => 'returned', 'label' => 'Returned', 'match' => ['returned', 'return']],
+        ['slug' => 'paid-return', 'label' => 'Paid Return', 'match' => ['paid-return', 'paid_return', 'paid return', 'paid returned']],
         ['slug' => 'cancelled', 'label' => 'Cancelled', 'match' => ['cancelled', 'cancel']],
         ['slug' => 'completed', 'label' => 'Completed', 'match' => ['completed', 'complete']],
     ];

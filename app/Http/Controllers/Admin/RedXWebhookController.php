@@ -167,6 +167,7 @@ class RedXWebhookController extends Controller
         // 2) cancel (11) হলে, যদি আগেরটা active group এ থাকে -> স্টক রিস্টোর
         $cancelLikeStatuses = array_values(array_unique(array_filter([
             $this->resolveStatusId(['cancelled', 'canceled', 'cancel'], 11),
+            $this->resolveStatusId(['paid-return', 'paid_return', 'paid return']),
             $this->resolveStatusId(['returned', 'return', 'return_to_merchant']),
         ])));
 

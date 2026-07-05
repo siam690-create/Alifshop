@@ -83,6 +83,11 @@ class Order extends Model
         return $this->belongsTo(User::class, 'created_by');
     }
 
+    public function resellerInvoiceItem()
+    {
+        return $this->hasOne(ResellerInvoiceItem::class, 'order_id');
+    }
+
     public function orderHistories()
     {
         return $this->hasMany(OrderHistory::class, 'order_id')->orderBy('created_at');

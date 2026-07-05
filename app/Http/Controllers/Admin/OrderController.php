@@ -1346,6 +1346,7 @@ class OrderController extends Controller
                     WHEN LOWER(slug) = 'delivered' THEN 10
                     WHEN LOWER(slug) IN ('partial-delivered', 'partial_delivered') THEN 11
                     WHEN LOWER(slug) = 'returned' THEN 12
+                    WHEN LOWER(slug) IN ('paid-return', 'paid_return') THEN 13
                     ELSE 999
                 END
             ")
@@ -1365,6 +1366,7 @@ class OrderController extends Controller
             ['slug' => 'in-courier', 'label' => 'In Courier', 'icon' => 'fe-truck', 'tone' => 'accent'],
             ['slug' => 'delivered', 'label' => 'Delivered', 'icon' => 'fe-check-circle', 'tone' => 'success'],
             ['slug' => 'returned', 'label' => 'Returned', 'icon' => 'fe-corner-up-left', 'tone' => 'danger'],
+            ['slug' => 'paid-return', 'label' => 'Paid Return', 'icon' => 'fe-dollar-sign', 'tone' => 'warning'],
         ])->map(function ($card) use ($orderstatus) {
             if (!isset($card['count'])) {
                 $matched = $orderstatus->first(function ($status) use ($card) {
@@ -3594,13 +3596,14 @@ class OrderController extends Controller
         $cartinfo       = Cart::instance('pos_shopping')->content();
         $shippingcharge = ShippingCharge::where('status', 1)->get();
         $quickOrderStatuses = OrderStatus::query()
-            ->whereIn('slug', ['new', 'pending', 'processing'])
-            ->orWhereIn('name', ['New', 'Pending', 'Processing', 'Approved'])
+            ->whereIn('slug', ['new', 'pending', 'processing', 'paid-return'])
+            ->orWhereIn('name', ['New', 'Pending', 'Processing', 'Approved', 'Paid Return'])
             ->orderByRaw("CASE
                 WHEN LOWER(slug) = 'new' OR LOWER(name) = 'new' THEN 1
                 WHEN LOWER(slug) = 'pending' OR LOWER(name) = 'pending' THEN 2
                 WHEN LOWER(slug) = 'processing' OR LOWER(name) IN ('processing', 'approved') THEN 3
-                ELSE 4 END")
+                WHEN LOWER(slug) IN ('paid-return', 'paid_return') OR LOWER(name) = 'paid return' THEN 4
+                ELSE 5 END")
             ->get();
 
         return view('backEnd.order.create', compact(
@@ -3619,6 +3622,7 @@ class OrderController extends Controller
             'address' => 'required|string',
             'area'    => 'required',
             'order_status' => 'nullable|exists:order_statuses,id',
+            'paid_return_amount' => 'nullable|numeric|min:0',
         ]);
 
         if (Cart::instance('pos_shopping')->count() <= 0) {
@@ -3662,6 +3666,9 @@ class OrderController extends Controller
         $order->shipping_charge = isset($shippingfee->amount) ? $shippingfee->amount : 0;
         $order->customer_id     = $customer_id;
         $order->order_status    = (int) ($request->order_status ?: (OrderStatus::where('slug', 'new')->value('id') ?: 1));
+        if (Schema::hasColumn('orders', 'paid_return_amount')) {
+            $order->paid_return_amount = max(0, (float) $request->input('paid_return_amount', 0));
+        }
         if (Schema::hasColumn('orders', 'created_by')) {
             $order->created_by = Auth::guard('admin')->id() ?: auth()->id();
         }
@@ -4311,13 +4318,14 @@ class OrderController extends Controller
 
         $cartinfo = Cart::instance('pos_shopping')->content();
         $quickOrderStatuses = OrderStatus::query()
-            ->whereIn('slug', ['new', 'pending', 'processing'])
-            ->orWhereIn('name', ['New', 'Pending', 'Processing', 'Approved'])
+            ->whereIn('slug', ['new', 'pending', 'processing', 'paid-return'])
+            ->orWhereIn('name', ['New', 'Pending', 'Processing', 'Approved', 'Paid Return'])
             ->orderByRaw("CASE
                 WHEN LOWER(slug) = 'new' OR LOWER(name) = 'new' THEN 1
                 WHEN LOWER(slug) = 'pending' OR LOWER(name) = 'pending' THEN 2
                 WHEN LOWER(slug) = 'processing' OR LOWER(name) IN ('processing', 'approved') THEN 3
-                ELSE 4 END")
+                WHEN LOWER(slug) IN ('paid-return', 'paid_return') OR LOWER(name) = 'paid return' THEN 4
+                ELSE 5 END")
             ->get();
 
         return view('backEnd.order.edit', compact(
@@ -4338,6 +4346,7 @@ class OrderController extends Controller
             'address' => 'required',
             'area'    => 'required',
             'order_status' => 'nullable|exists:order_statuses,id',
+            'paid_return_amount' => 'nullable|numeric|min:0',
         ]);
 
         if (Cart::instance('pos_shopping')->count() <= 0) {
@@ -4390,6 +4399,9 @@ class OrderController extends Controller
         $order->shipping_charge = $newShippingCharge;
         $order->customer_id     = $customer->id;
         $order->order_status    = $selectedOrderStatus;
+        if (Schema::hasColumn('orders', 'paid_return_amount')) {
+            $order->paid_return_amount = max(0, (float) $request->input('paid_return_amount', 0));
+        }
         $order->note            = $orderSource !== '' ? $orderSource : null;
         if (Schema::hasColumn('orders', 'order_source_channel') && $order->created_by) {
             $order->order_source_channel = 'created';

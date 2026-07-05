@@ -211,6 +211,8 @@ class PaperflyWebhookController extends Controller
             'parcel.partial' => $this->resolveStatusId(['partial-delivered', 'partial_delivered', 'partial delivered']),
             'parcel.exchange' => $this->resolveStatusId(['delivered', 'completed', 'complete'], 6),
             'parcel.on_hold' => $processingStatusId,
+            'parcel.paid_return' => $this->resolveStatusId(['paid-return', 'paid_return', 'paid return']),
+            'parcel.return_paid' => $this->resolveStatusId(['paid-return', 'paid_return', 'paid return']),
             'parcel.return' => $this->resolveStatusId(['returned', 'return', 'return_to_merchant']),
             'parcel.return_transit' => $this->resolveStatusId(['returned', 'return', 'return_to_merchant']),
             'parcel.return_to_merchant' => $this->resolveStatusId(['returned', 'return', 'return_to_merchant']),
@@ -233,6 +235,11 @@ class PaperflyWebhookController extends Controller
                 [
                     'match' => ['partial', 'partial delivered', 'partially delivered'],
                     'target' => ['partial-delivered', 'partial_delivered', 'partial delivered'],
+                    'fallback' => null,
+                ],
+                [
+                    'match' => ['paid return', 'paid returned', 'return paid', 'returned paid', 'paid return transit'],
+                    'target' => ['paid-return', 'paid_return', 'paid return'],
                     'fallback' => null,
                 ],
                 [
@@ -293,6 +300,7 @@ class PaperflyWebhookController extends Controller
 
         $cancelLikeStatuses = array_values(array_unique(array_filter([
             $this->resolveStatusId(['cancelled', 'canceled', 'cancel'], 11),
+            $this->resolveStatusId(['paid-return', 'paid_return', 'paid return']),
             $this->resolveStatusId(['returned', 'return', 'return_to_merchant']),
         ])));
 

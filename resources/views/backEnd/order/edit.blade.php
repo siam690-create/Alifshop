@@ -249,6 +249,11 @@
                                 @endforeach
                             </select>
                         </div>
+                        <div class="mb-3">
+                            <label class="form-label">Paid Return Amount</label>
+                            <input type="number" min="0" step="0.01" name="paid_return_amount" class="form-control" value="{{ old('paid_return_amount', number_format((float) ($order->paid_return_amount ?? 0), 2, '.', '')) }}">
+                            <small class="text-muted">Only fill when status is Paid Return.</small>
+                        </div>
                         <div class="mb-0">
                             <label class="form-label">Note</label>
                             <textarea id="courier_note" class="form-control" name="courier_note" rows="2" placeholder="note">{{ $courierNoteValue }}</textarea>

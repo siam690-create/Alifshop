@@ -49,6 +49,11 @@ class CheckCourierOrderStatus extends Command
             'return',
             'return_to_merchant',
         ]);
+        $paidReturnStatusId = $this->resolveStatusId([
+            'paid-return',
+            'paid_return',
+            'paid return',
+        ]);
         $cancelledStatusId = $this->resolveStatusId([
             'cancelled',
             'canceled',
@@ -66,6 +71,7 @@ class CheckCourierOrderStatus extends Command
         $terminalStatuses = array_values(array_filter([
             $deliveredStatusId,
             $returnedStatusId,
+            $paidReturnStatusId,
             $cancelledStatusId,
             $partialDeliveredStatusId,
         ]));
@@ -525,6 +531,17 @@ class CheckCourierOrderStatus extends Command
             ],
             [
                 'match' => [
+                    'paid return',
+                    'paid returned',
+                    'return paid',
+                    'returned paid',
+                    'paid return approval pending',
+                ],
+                'target' => ['paid-return', 'paid_return', 'paid return'],
+                'fallback' => null,
+            ],
+            [
+                'match' => [
                     'returned',
                     'return',
                     'return to merchant',
@@ -612,6 +629,7 @@ class CheckCourierOrderStatus extends Command
         $cancelLikeStatuses = array_values(array_unique(array_filter([
             $this->resolveStatusId(['cancelled', 'canceled', 'cancel'], 11),
             $this->resolveStatusId(['returned', 'return', 'return_to_merchant']),
+            $this->resolveStatusId(['paid-return', 'paid_return', 'paid return']),
         ])));
 
         if (in_array($newStatus, $cancelLikeStatuses, true) && in_array($oldStatus, $activeStatusIds, true)) {

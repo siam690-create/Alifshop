@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Toastr;
 
 class WithdrawalController extends Controller
 {
@@ -28,6 +29,9 @@ class WithdrawalController extends Controller
 
     public function store(Request $request)
     {
+        Toastr::info('Manual withdraw is disabled. Your payable orders will be grouped into invoices automatically.', 'Invoice Enabled');
+        return redirect()->route('reseller.invoices.index');
+
         $user = Auth::guard('admin')->user();
         $walletBalance = round((float) ($user->wallet_balance ?? 0), 2);
         $min = config('app.reseller_min_withdraw', 100);
