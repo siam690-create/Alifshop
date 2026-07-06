@@ -426,7 +426,7 @@
                         @endif
                         
                         <!-- Pending Withdrawals Notification -->
-                        @if(isset($resellerPendingWithdrawals) && $resellerPendingWithdrawals > 0)
+                        @if(false && isset($resellerPendingWithdrawals) && $resellerPendingWithdrawals > 0)
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <a class="dropdown-item py-3 border-bottom" href="{{ route('reseller.withdrawals.index') }}">
@@ -449,7 +449,7 @@
                         @endif
                         
                         <!-- Recent Withdrawals -->
-                        @if(isset($resellerRecentWithdrawals) && $resellerRecentWithdrawals->count() > 0)
+                        @if(false && isset($resellerRecentWithdrawals) && $resellerRecentWithdrawals->count() > 0)
                         <li><hr class="dropdown-divider"></li>
                         <li>
                             <div class="px-3 py-2 border-bottom">
@@ -485,7 +485,7 @@
                         
                         <!-- Empty State -->
                         @if((!isset($resellerPendingOrders) || $resellerPendingOrders == 0) && 
-                            (!isset($resellerPendingWithdrawals) || $resellerPendingWithdrawals == 0) && 
+                            true && 
                             (isset($resellerVerificationStatus) && $resellerVerificationStatus == 'approved'))
                         <li>
                             <div class="px-3 py-4 text-center text-muted">

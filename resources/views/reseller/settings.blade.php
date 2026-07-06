@@ -298,7 +298,7 @@
                 </div>
                 <h5 class="text-dark fw-bold">পেমেন্ট মেথড</h5>
                 <p class="text-muted">এই ফিচারটি শীঘ্রই আসছে। আপনি এখন ম্যানুয়াল উইথড্র রিকোয়েস্ট করতে পারেন।</p>
-                <a href="{{ route('reseller.withdrawals.index') }}" class="btn btn-outline-primary rounded-pill">
+                <a href="{{ route('reseller.withdrawals.index') }}" class="btn btn-outline-primary rounded-pill d-none">
                     উইথড্র রিকোয়েস্ট পেজে যান
                 </a>
             </div>

@@ -269,7 +269,7 @@ Route::prefix('reseller')
         Route::get('/orders', [ResellerDashboardController::class, 'orders'])->name('orders');
         Route::get('/customers', [ResellerDashboardController::class, 'customers'])->name('customers');
         Route::get('/wallet', [ResellerDashboardController::class, 'wallet'])->name('wallet');
-        Route::get('/withdrawals', [\App\Http\Controllers\Reseller\WithdrawalController::class, 'index'])->name('withdrawals.index');
+        Route::get('/withdrawals', fn () => redirect()->route('reseller.invoices.index'))->name('withdrawals.index');
         Route::post('/withdrawals', [\App\Http\Controllers\Reseller\WithdrawalController::class, 'store'])->name('withdrawals.store');
         Route::get('/invoices', [\App\Http\Controllers\Reseller\InvoiceController::class, 'index'])->name('invoices.index');
         Route::get('/invoices/{invoice}/csv', [\App\Http\Controllers\Reseller\InvoiceController::class, 'csv'])->name('invoices.csv');

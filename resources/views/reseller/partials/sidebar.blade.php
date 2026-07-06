@@ -66,7 +66,7 @@
                         <i class="fas fa-wallet me-2"></i> ওয়ালেট ও আয়
                     </a>
                 </li>
-                <li>
+                <li class="d-none">
                     <a class="dropdown-item" href="{{ route('reseller.withdrawals.index') }}">
                         <i class="fas fa-university me-2"></i> পেমেন্ট উইথড্র
                     </a>
@@ -134,7 +134,7 @@
                 <i class="fas fa-wallet"></i> ওয়ালেট ও আয়
             </a>
         </div>
-        <div class="nav-item">
+        <div class="nav-item d-none">
             <a href="{{ route('reseller.withdrawals.index') }}" class="nav-link {{ request()->routeIs('reseller.withdrawals.*') ? 'active' : '' }}">
                 <i class="fas fa-university"></i> পেমেন্ট উইথড্র
             </a>
