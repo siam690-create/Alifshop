@@ -247,18 +247,23 @@
                             @enderror
                         </div>
 
-                        <div class="mb-4 form-check form-switch">
-                            <input
-                                class="form-check-input"
-                                type="checkbox"
-                                id="status"
-                                name="status"
-                                value="1"
-                                {{ old('status', $setting->status ?? 1) ? 'checked' : '' }}
-                            >
-                            <label class="form-check-label" for="status">
-                                Facebook CAPI Active রাখুন
-                            </label>
+                        <div class="mb-4 p-3 rounded border bg-light d-flex align-items-center justify-content-between">
+                            <div>
+                                <strong class="d-block text-dark" style="font-size: 15px;">Facebook CAPI Status</strong>
+                                <small class="text-muted">Facebook CAPI Active (ON) বা Inactive (OFF) রাখুন</small>
+                            </div>
+                            <div class="form-check form-switch mb-0">
+                                <input
+                                    class="form-check-input"
+                                    type="checkbox"
+                                    role="switch"
+                                    id="status"
+                                    name="status"
+                                    value="1"
+                                    style="width: 3.5rem; height: 1.8rem; cursor: pointer; accent-color: #0acf97; margin-left: 0;"
+                                    {{ old('status', $setting->status ?? 1) ? 'checked' : '' }}
+                                >
+                            </div>
                         </div>
 
                         <div class="card mt-4 mb-4 border">
