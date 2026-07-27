@@ -45,12 +45,17 @@ class FacebookCapiSettingController extends Controller
             'status'          => 'nullable|boolean',
         ]);
 
+        $tokenInput = trim((string) $request->domain_verification_token);
+        if (preg_match('/content=["\']([^"\']+)["\']/i', $tokenInput, $matches)) {
+            $tokenInput = $matches[1];
+        }
+
         $data = [
             'pixel_id'        => $request->pixel_id,
             'access_token'    => $request->access_token,
             'test_event_code' => $request->test_event_code,
             'purchase_trigger' => $request->purchase_trigger ?: 'order_created',
-            'domain_verification_token' => $request->domain_verification_token,
+            'domain_verification_token' => $tokenInput,
             'tiktok_pixel_id' => $request->tiktok_pixel_id,
             'tiktok_access_token' => $request->tiktok_access_token,
             'tiktok_test_event_code' => $request->tiktok_test_event_code,

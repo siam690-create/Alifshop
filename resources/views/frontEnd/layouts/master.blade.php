@@ -32,7 +32,7 @@
         @php
             $facebookDomainToken = \Illuminate\Support\Facades\Cache::remember('facebook_capi_domain_verification_token', 3600, function () {
                 try {
-                    return optional(\App\Models\FacebookCapiSetting::where('status', 1)->first())->domain_verification_token;
+                    return optional(\App\Models\FacebookCapiSetting::first())->domain_verification_token;
                 } catch (\Throwable $e) {
                     return null;
                 }
