@@ -467,6 +467,23 @@
             })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
             @if(!empty($facebookTestEventCode))
             fbq("init", "{{ $pixelCode }}", {}, { test_event_code: "{{ $facebookTestEventCode }}" });
+            (function() {
+                var testCode = "{{ $facebookTestEventCode }}";
+                var origFbq = window.fbq;
+                if (origFbq && !origFbq._testCodeWrapped) {
+                    window.fbq = function() {
+                        var args = Array.prototype.slice.call(arguments);
+                        if (args[0] === 'track' || args[0] === 'trackCustom') {
+                            args[3] = Object.assign({}, args[3] || {}, { test_event_code: testCode });
+                        }
+                        return origFbq.apply(this, args);
+                    };
+                    for (var key in origFbq) {
+                        window.fbq[key] = origFbq[key];
+                    }
+                    window.fbq._testCodeWrapped = true;
+                }
+            })();
             @else
             fbq("init", "{{ $pixelCode }}");
             @endif
