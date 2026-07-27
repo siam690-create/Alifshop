@@ -17,6 +17,13 @@
                     return null;
                 }
             });
+            $facebookTestEventCode = \Illuminate\Support\Facades\Cache::remember('facebook_capi_test_event_code', 3600, function () {
+                try {
+                    return optional(\App\Models\FacebookCapiSetting::first())->test_event_code;
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            });
             $tiktokPixelId = \Illuminate\Support\Facades\Cache::remember('tiktok_browser_pixel_id', 3600, function () {
                 try {
                     return optional(\App\Models\FacebookCapiSetting::where('tiktok_status', 1)->first())->tiktok_pixel_id;
@@ -458,7 +465,11 @@
                 s = b.getElementsByTagName(e)[0];
                 s.parentNode.insertBefore(t, s);
             })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
+            @if(!empty($facebookTestEventCode))
+            fbq("init", "{{ $pixelCode }}", {}, { test_event_code: "{{ $facebookTestEventCode }}" });
+            @else
             fbq("init", "{{ $pixelCode }}");
+            @endif
             fbq("track", "PageView");
         </script>
         <noscript>
