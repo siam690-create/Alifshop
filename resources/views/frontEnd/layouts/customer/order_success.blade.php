@@ -342,6 +342,15 @@ window.dataLayer.push({
     }
 });
 
+if (typeof fbq === "function") {
+    fbq("track", "Purchase", {
+        value: {{ (float) $grand_total }},
+        currency: "BDT",
+        content_type: "product",
+        contents: @json($purchaseItems->map(function($i) { return ['id' => $i['item_id'], 'quantity' => $i['quantity']]; })->values())
+    }, { eventID: @json('purchase_' . $order->id) });
+}
+
 if (window.ttq) {
     const tiktokUserData = @json($tiktokUserData);
     if (Object.keys(tiktokUserData).length) {
