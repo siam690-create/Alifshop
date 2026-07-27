@@ -247,22 +247,7 @@
                             @enderror
                         </div>
 
-                        <div class="mb-4 p-3 rounded border bg-light d-flex align-items-center justify-content-between">
-                            <div>
-                                <strong class="d-block text-dark" style="font-size: 15px;">Facebook CAPI Status</strong>
-                                <small class="text-muted">Facebook CAPI Active (ON) বা Inactive (OFF) রাখুন</small>
-                            </div>
-                            <div>
-                                <input
-                                    type="checkbox"
-                                    id="status"
-                                    name="status"
-                                    value="1"
-                                    style="display: block !important; opacity: 1 !important; visibility: visible !important; width: 48px !important; height: 24px !important; appearance: auto !important; -webkit-appearance: auto !important; cursor: pointer; accent-color: #0acf97;"
-                                    {{ old('status', $setting->status ?? 1) ? 'checked' : '' }}
-                                >
-                            </div>
-                        </div>
+
 
                         <div class="card mt-4 mb-4 border">
                             <div class="card-header">

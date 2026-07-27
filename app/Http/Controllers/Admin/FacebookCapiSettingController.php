@@ -60,7 +60,7 @@ class FacebookCapiSettingController extends Controller
             'tiktok_access_token' => $request->tiktok_access_token,
             'tiktok_test_event_code' => $request->tiktok_test_event_code,
             'tiktok_status' => $request->has('tiktok_status') ? 1 : 0,
-            'status'          => $request->has('status') ? 1 : 0,
+            'status'          => 1,
         ];
 
         // Use firstOrCreate to ensure only one record exists
