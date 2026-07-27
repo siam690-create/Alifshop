@@ -29,7 +29,27 @@
                 <meta name="google-site-verification" content="{{ $seo->search_console_verification }}" />
             @endif
         @endif
-        <style>
+        <!-- App favicon -->
+        <link rel="shortcut icon" href="{{ asset($generalsetting->favicon ?? 'favicon.ico') }}" alt="Super Ecommerce Favicon" />
+        <meta name="author" content="Super Ecommerce" />
+        <link rel="canonical" href="" />
+        @stack('seo') 
+        @stack('css')
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/bootstrap.min.css')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/animate.css')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/all.min.css')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/owl.carousel.min.css')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/owl.theme.default.min.css')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/mobile-menu.css')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/select2.min.css')}}" />
+        <!-- toastr css -->
+        <link rel="stylesheet" href="{{asset('public/backEnd/')}}/assets/css/toastr.min.css" />
+
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/wsit-menu.css')}}" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/style.css')}}?v=1" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/responsive.css')}}?v=1" />
+        <link rel="stylesheet" href="{{asset('public/frontEnd/css/main.css')}}" />
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.5.0/css/font-awesome.min.css">
             .float{
             	position:fixed;
             	color:white;
