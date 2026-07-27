@@ -1122,6 +1122,9 @@
         }
 
         // Facebook Pixel: ViewContent
+        @php
+            $viewContentEventId = 'view_' . $details->id . '_' . date('YmdH');
+        @endphp
         if (typeof fbq === "function") {
             fbq("track", "ViewContent", {
                 content_ids: [productItem.item_id],
@@ -1129,7 +1132,7 @@
                 content_category: productItem.item_category,
                 value: productItem.price,
                 currency: "BDT"
-            });
+            }, { eventID: @json($viewContentEventId) });
         }
 
         // Helper: qty সহ item তৈরি

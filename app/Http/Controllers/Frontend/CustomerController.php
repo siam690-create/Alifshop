@@ -797,6 +797,7 @@ class CustomerController extends Controller
         // ⭐ কার্টে ডিজিটাল প্রোডাক্ট আছে কি না
         $hasDigital = \App\Http\Controllers\Frontend\ShoppingController::hasDigitalProductInCart();
 
+        $checkoutEventId = 'checkout_' . md5(session()->getId() . date('YmdH'));
         try {
             $cartItems = Cart::instance('shopping')->content();
             $contentIds = $cartItems->pluck('id')->map(fn($id) => (string)$id)->values()->toArray();
@@ -806,7 +807,7 @@ class CustomerController extends Controller
                 'value' => $subtotal,
                 'currency' => 'BDT',
                 'num_items' => Cart::instance('shopping')->count(),
-            ]);
+            ], [], ['event_id' => $checkoutEventId]);
         } catch (\Throwable $e) {}
 
         // If reseller is logged in, redirect to reseller checkout

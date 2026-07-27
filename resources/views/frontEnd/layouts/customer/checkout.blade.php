@@ -1038,6 +1038,9 @@
         }
 
         // Facebook Pixel: InitiateCheckout
+        @php
+            $checkoutEventId = 'checkout_' . md5(session()->getId() . date('YmdH'));
+        @endphp
         if (typeof fbq === "function" && items.length) {
             fbq("track", "InitiateCheckout", {
                 value: payableNow,
@@ -1048,7 +1051,7 @@
                     return {id: i.id, quantity: i.qty, item_price: i.price};
                 }),
                 coupon: coupon || undefined
-            });
+            }, { eventID: @json($checkoutEventId) });
         }
 
         // On form submit: GA4 add_payment_info + Pixel AddPaymentInfo

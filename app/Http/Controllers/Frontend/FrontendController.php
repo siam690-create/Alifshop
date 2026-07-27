@@ -852,6 +852,7 @@ $brands = Brand::where('status', 1)
             ])
             ->firstOrFail();
 
+        $viewContentEventId = 'view_' . $details->id . '_' . date('YmdH');
         try {
             app(\App\Services\FacebookCapiService::class)->sendViewContent([
                 'content_ids' => [(string) $details->id],
@@ -859,7 +860,7 @@ $brands = Brand::where('status', 1)
                 'content_category' => optional($details->category)->name ?? '',
                 'value' => (float) ($details->new_price ?? $details->old_price ?? 0),
                 'currency' => 'BDT',
-            ]);
+            ], [], ['event_id' => $viewContentEventId]);
         } catch (\Throwable $e) {}
 
         $products = Product::where(['category_id' => $details->category_id, 'status' => 1, 'approval_status' => 'approved'])
