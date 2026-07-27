@@ -10,6 +10,13 @@
                     return null;
                 }
             });
+            $facebookCapiPixelId = \Illuminate\Support\Facades\Cache::remember('facebook_capi_pixel_id', 3600, function () {
+                try {
+                    return optional(\App\Models\FacebookCapiSetting::first())->pixel_id;
+                } catch (\Throwable $e) {
+                    return null;
+                }
+            });
             $tiktokPixelId = \Illuminate\Support\Facades\Cache::remember('tiktok_browser_pixel_id', 3600, function () {
                 try {
                     return optional(\App\Models\FacebookCapiSetting::where('tiktok_status', 1)->first())->tiktok_pixel_id;
@@ -423,8 +430,16 @@
     }
 }
 </style>
-        @foreach(($pixels ?? collect()) as $pixel)
-        @continue(isset($pixel->browser_tracking_enabled) && !$pixel->browser_tracking_enabled)
+        @php
+            $allPixelCodes = collect(($pixels ?? collect()))->filter(function($p) {
+                return !isset($p->browser_tracking_enabled) || $p->browser_tracking_enabled;
+            })->pluck('code')->filter()->toArray();
+
+            if (!empty($facebookCapiPixelId) && !in_array($facebookCapiPixelId, $allPixelCodes)) {
+                $allPixelCodes[] = $facebookCapiPixelId;
+            }
+        @endphp
+        @foreach($allPixelCodes as $pixelCode)
         <!-- Facebook Pixel Code -->
         <script>
             !(function (f, b, e, v, n, t, s) {
@@ -443,11 +458,11 @@
                 s = b.getElementsByTagName(e)[0];
                 s.parentNode.insertBefore(t, s);
             })(window, document, "script", "https://connect.facebook.net/en_US/fbevents.js");
-            fbq("init", "{{{$pixel->code}}}");
+            fbq("init", "{{ $pixelCode }}");
             fbq("track", "PageView");
         </script>
         <noscript>
-            <img height="1" width="1" style="display: none;" src="https://www.facebook.com/tr?id={{{$pixel->code}}}&ev=PageView&noscript=1" />
+            <img height="1" width="1" style="display: none;" src="https://www.facebook.com/tr?id={{ $pixelCode }}&ev=PageView&noscript=1" />
         </noscript>
         <!-- End Facebook Pixel Code -->
         @endforeach
