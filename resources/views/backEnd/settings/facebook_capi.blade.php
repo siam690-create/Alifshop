@@ -252,15 +252,13 @@
                                 <strong class="d-block text-dark" style="font-size: 15px;">Facebook CAPI Status</strong>
                                 <small class="text-muted">Facebook CAPI Active (ON) বা Inactive (OFF) রাখুন</small>
                             </div>
-                            <div class="form-check form-switch mb-0">
+                            <div>
                                 <input
-                                    class="form-check-input"
                                     type="checkbox"
-                                    role="switch"
                                     id="status"
                                     name="status"
                                     value="1"
-                                    style="width: 3.5rem; height: 1.8rem; cursor: pointer; accent-color: #0acf97; margin-left: 0;"
+                                    style="display: block !important; opacity: 1 !important; visibility: visible !important; width: 48px !important; height: 24px !important; appearance: auto !important; -webkit-appearance: auto !important; cursor: pointer; accent-color: #0acf97;"
                                     {{ old('status', $setting->status ?? 1) ? 'checked' : '' }}
                                 >
                             </div>
