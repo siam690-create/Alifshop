@@ -852,6 +852,16 @@ $brands = Brand::where('status', 1)
             ])
             ->firstOrFail();
 
+        try {
+            app(\App\Services\FacebookCapiService::class)->sendViewContent([
+                'content_ids' => [(string) $details->id],
+                'content_name' => $details->name,
+                'content_category' => optional($details->category)->name ?? '',
+                'value' => (float) ($details->new_price ?? $details->old_price ?? 0),
+                'currency' => 'BDT',
+            ]);
+        } catch (\Throwable $e) {}
+
         $products = Product::where(['category_id' => $details->category_id, 'status' => 1, 'approval_status' => 'approved'])
             ->with('image')
             ->select('id', 'name', 'slug', 'new_price', 'old_price','stock')

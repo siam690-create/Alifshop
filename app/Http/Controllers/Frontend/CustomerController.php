@@ -797,6 +797,18 @@ class CustomerController extends Controller
         // ⭐ কার্টে ডিজিটাল প্রোডাক্ট আছে কি না
         $hasDigital = \App\Http\Controllers\Frontend\ShoppingController::hasDigitalProductInCart();
 
+        try {
+            $cartItems = Cart::instance('shopping')->content();
+            $contentIds = $cartItems->pluck('id')->map(fn($id) => (string)$id)->values()->toArray();
+            $subtotal = (float) str_replace(',', '', Cart::instance('shopping')->subtotal());
+            app(\App\Services\FacebookCapiService::class)->sendInitiateCheckout([
+                'content_ids' => $contentIds,
+                'value' => $subtotal,
+                'currency' => 'BDT',
+                'num_items' => Cart::instance('shopping')->count(),
+            ]);
+        } catch (\Throwable $e) {}
+
         // If reseller is logged in, redirect to reseller checkout
         if (Auth::guard('admin')->check()) {
             $resellerUser = Auth::guard('admin')->user();

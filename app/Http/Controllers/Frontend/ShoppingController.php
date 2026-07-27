@@ -279,6 +279,20 @@ if ($price <= 0) {
             ],
         ]);
 
+        try {
+            $qty = (int) ($request->qty ?? 1);
+            app(\App\Services\FacebookCapiService::class)->sendAddToCart([
+                'content_ids' => [(string) $product->id],
+                'content_name' => $product->name,
+                'value' => (float) ($price * $qty),
+                'currency' => 'BDT',
+                'num_items' => $qty,
+                'contents' => [
+                    ['id' => (string) $product->id, 'quantity' => $qty]
+                ]
+            ]);
+        } catch (\Throwable $e) {}
+
         Toastr::success('Product added to cart successfully!', 'Success');
 
         // যদি ফর্ম থেকে "order_now" ক্লিক করা হয়ে থাকে, সরাসরি checkout
