@@ -118,6 +118,21 @@
     <div class="col-xl-8">
         <form action="{{ route('reseller.products.quick_order.store', $product->slug) }}" method="POST" id="quickOrderForm">
             @csrf
+            @if ($errors->any())
+            <div class="alert alert-danger border-0 shadow-sm mb-4" style="border-left: 5px solid #dc3545 !important;">
+                <div class="d-flex align-items-start gap-3">
+                    <i class="fas fa-exclamation-circle fs-4 mt-1"></i>
+                    <div>
+                        <strong>অর্ডার সাবমিট হয়নি। নিচের তথ্যগুলো ঠিক করুন:</strong>
+                        <ul class="mb-0 mt-2 ps-3">
+                            @foreach ($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            @endif
             <div class="quick-order-card mb-4">
                 <div class="quick-order-header">
                     <div class="d-flex flex-wrap justify-content-between align-items-center gap-3">
@@ -273,7 +288,7 @@
                 <span>৳<span id="summaryGrandTotal">{{ number_format($product->reseller_price + ($defaultArea->amount ?? 0), 0, '.', '') }}</span></span>
             </div>
 
-            <button type="submit" form="quickOrderForm" class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-4">
+            <button type="submit" form="quickOrderForm" class="btn btn-primary w-100 rounded-pill py-3 fw-bold mt-4" id="quickOrderSubmitBtn">
                 <i class="fas fa-paper-plane me-2"></i> অর্ডার কনফার্ম করুন
             </button>
 
@@ -309,6 +324,20 @@
     document.getElementById('product_qty').addEventListener('input', updateQuickOrderSummary);
     document.getElementById('custom_price').addEventListener('input', updateQuickOrderSummary);
     document.getElementById('shipping_area').addEventListener('change', updateQuickOrderSummary);
+    document.getElementById('quickOrderForm').addEventListener('submit', function(e) {
+        const firstInvalidField = this.querySelector(':invalid');
+        const submitButton = document.getElementById('quickOrderSubmitBtn');
+
+        if (firstInvalidField) {
+            e.preventDefault();
+            firstInvalidField.reportValidity();
+            firstInvalidField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return false;
+        }
+
+        submitButton.disabled = true;
+        submitButton.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>অর্ডার সাবমিট হচ্ছে...';
+    });
     updateQuickOrderSummary();
 </script>
 @endpush
