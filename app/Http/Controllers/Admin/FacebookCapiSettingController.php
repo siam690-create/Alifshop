@@ -73,6 +73,8 @@ class FacebookCapiSettingController extends Controller
 
         // Clear cache so new settings are loaded immediately
         Cache::forget('facebook_capi_settings');
+        Cache::forget('facebook_capi_pixel_id');
+        Cache::forget('facebook_capi_test_event_code');
         Cache::forget('facebook_capi_domain_verification_token');
         Cache::forget('tiktok_events_api_settings');
         Cache::forget('tiktok_browser_pixel_id');
